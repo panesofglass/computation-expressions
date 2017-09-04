@@ -1,5 +1,14 @@
-source https://nuget.org/api/v2
+generate_load_scripts: true
 
-nuget FsReveal
-nuget FAKE
-nuget Suave
+source https://nuget.org/api/v2
+framework: net462
+
+nuget Freya.Hopac prerelease
+nuget FSharp.Control.Reactive
+
+group Build
+    source https://nuget.org/api/v2
+
+    nuget FsReveal
+    nuget FAKE
+    nuget Suave

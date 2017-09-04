@@ -175,6 +175,7 @@ TestResults.xml
 
 # Nuget outputs
 nuget/*.nupkg
+.paket/load/
 .paket/paket.exe
 output
 paket-files

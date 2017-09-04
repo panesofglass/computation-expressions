@@ -6,6 +6,16 @@
 - transition : default
 
 ***
+*)
+
+(*** hide ***)
+System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
+#load "../.paket/load/net462/main.group.fsx"
+open System
+open System.Net
+open FSharp.Control.Reactive
+
+(**
 
 ## Extending F# through Computation Expressions
 
@@ -18,9 +28,10 @@
 ' This is a somewhat advanced level talk in that I assume
 ' you know or are familiar with a few of the more advanced
 ' aspects of F# or similar languages, including:
-' - how to write a basic computation expression
+' - how to write a computation expression
 ' - monoids, monads, applicatives, etc.
 ' - statically resolved type parameters
+' - .NET method overloading
 
 ***
 
@@ -78,8 +89,12 @@
 ### Seq<'T>
 *)
 
-(*** include: seq-example ***)
-(*** include-it: seq-example-out ***)
+(*** define-output: seq-example ***)
+seq {
+    for i in 1..10 do
+    yield i
+}
+(*** include-it: seq-example ***)
 
 (**
 
@@ -97,8 +112,14 @@
 ### Concatenating Seq<'T>
 *)
 
-(*** include: monoid-example ***)
-(*** include-it: monoid-example-out ***)
+(*** define-output: monoid-example ***)
+let xs = seq { for i in 1..10 -> i }
+let ys = seq { for i in 11..20 -> i }
+seq {
+    yield! xs
+    yield! ys
+}
+(*** include-it: monoid-example ***)
 
 (**
 
@@ -119,8 +140,17 @@
 ### Async<'T>
 *)
 
-(*** include: async-example ***)
-(*** include-it: async-example-out ***)
+(*** define-output: async-example ***)
+async {
+    let req = WebRequest.Create("http://openfsharp.org/")
+    let! resp = req.AsyncGetResponse()
+    use stream = resp.GetResponseStream()
+    let! bytes = stream.AsyncRead(91)
+    let text = Text.Encoding.UTF8.GetString(bytes)
+    return (resp :?> HttpWebResponse).StatusCode, text
+}
+|> Async.RunSynchronously
+(*** include-it: async-example ***)
 
 (**
 
@@ -195,14 +225,193 @@
 ### OptionBuilder
 *)
 
-(*** include: option-builder ***)
-(*** include-it: option-builder-out ***)
+type OptionBuilderCore() =
+    member __.Bind(m, f) = Option.bind f m
+    member __.Return(x) = Some x
+
+let opt = OptionBuilderCore()
 
 (**
+
+[Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
+
+' This is the basic definition of a monad written as a
+' computation expression. The computation expression is
+' written as a simple .NET class with members having
+' certain names and matching a limited range of type signatures.
+' We are not going to cover all of the methods and their
+' signatures today, but you can find them listed in the Microsoft
+' documentation online.
+' Unfortunately, this does not quite complete what's possible.
+
+***
+
+### OptionBuilder
+*)
+
+type OptionBuilder() =
+    member __.Bind(m, f) = Option.bind f m
+    member __.Return(x) = Some x
+    member __.ReturnFrom(m: 'T option) = m
+    member __.Zero() = Some ()
+    member __.Combine(m, f: unit -> 'T option) = Option.bind f m
+    member __.Delay(f: unit -> 'T) = f
+    member __.Run(f) = f()
+
+let maybe = OptionBuilder()
+
+(**
+
+' The previous implementation eagerly evaluates the computation.
+' Computation Expressions allow you to insert delays into the
+' computation so they don't run eagerly. In addition, we've
+' added members to help with combining computations return unit
+' with continuing computations.
+
+***
+
+### Delayed Computations
+*)
+
+(*** define-output: option-builder ***)
+let one = maybe { return 1 }
+let double x = maybe { return x * 2 }
+let carryOn = (*true*) false
+maybe {
+    if carryOn then
+        printfn "proceeding"
+        let! x = one
+        let! y = double x
+        return x + y
+    else return! None
+}
+(*** include-it: option-builder ***)
+
+(**
+
+' Here we see that we can retrieve the values of one and two
+' and add them together if carryOn is true. Otherwise, we
+' can return a None directly using ReturnFrom.
+
+***
+
+### Why should we care?
 
 *)
 
+if carryOn then
+    printfn "proceeding"
+    match one with
+    | Some x ->
+        match double x with
+        | Some y -> Some(x + y)
+        | None -> None
+    | None -> None
+else None
+
 (**
+
+' The above could be written like this, with nested match expressions.
+' The computation expression clearly wins out in terms of succinctness.
+' We also don't have to thread all the `None -> None` cases. This may
+' not seems like such a big deal until you get into a situation where
+' you have to cascade many option values in a long arrowhead pattern,
+' e.g. if you are doing some parsing.
+' In other words, computation expressions allow us to streamline our
+' code such that it looks mostly like normal F# code while making side-
+' effects explicit.
+
+***
+
+## Back to the One Ring
+
+* [FSharpPlus](https://github.com/gusty/FSharpPlus)
+* [FSharpx.Extras](https://github.com/fsprojects/FSharpx.Extras/tree/master/src/FSharpx.Extras/ComputationExpressions)
+* [Higher](https://github.com/palladin/Higher)
+
+' You may get caught in the trap of falling of falling into this pattern.
+' Many computations can be written almost exactly alike, assuming they are
+' monads. However, F# is not a purely functional, lazy language like Haskell,
+' and the implementations cannot be implemented exactly alike.
+' The One Ring, in this story, is the Haskell do-notation. FSharpPlus achieved
+' do-notation, which is a single computation expression abstraced over any
+' monadic type. The implementation is interesting and worth your time to
+' investigate, but we won't be diving deeper in this talk.
+' Nevertheless, these implementations offer hints to the potential power
+' of F# computation expressions we'll see in a bit.
+
+***
+
+## [Classes for the Masses](https://github.com/MattoWindsor91/visualfsharp/blob/hackathon-vs/examples/fsconcepts.md)
+
+' Incidentally, type classes, which Haskell uses to encode monads and other
+' container types, have a proven encoding in F# and may be coming in a future
+' release. Hopefully this will alleviate some of the pit of computation-
+' expressions-as-monad-encodings that many fall into.
+
+***
+
+## Seven for the Dwarf-lords in their halls of stone
+
+*)
+
+query {
+    for x in 1..10 do
+    for y in 11..20 do
+    where (x % 2 = 1 && y % 2 = 0)
+    select (x + y)
+}
+
+(**
+
+' F# 3.0, released in 2012, introduced query expressions. In order
+' to support query expressions, F# also introduced the `CustomOperationAttribute`.
+' Unfortunately, F# 3.0 also introduced type providers, and these drew
+' the most excitement in the community. So much so that experimentation with
+' computation expressions stagnated. However, some work still continued with
+' interesting results.
+
+***
+
+## [FSharp.Control.Reactive](http://fsprojects.github.io/FSharp.Control.Reactive/)
+
+*)
+
+open FSharp.Control.Reactive.Builders
+
+(*** define-output: rxquery-zip ***)
+rxquery {
+    for x in (Observable.ofSeq [|1..10|]) do
+    zip y in (Observable.ofSeq [|11..20|])
+    select (x + y)
+}
+|> Observable.subscribe (printfn "%i")
+
+(*** include-output: rxquery-zip ***)
+
+(**
+
+' Rx.NET works just fine from F#, but FSharp.Control.Reactive provides extensions
+' to the Observable module to fit the F# style. It also provides an `observe`
+' computation expression for the monadic operations and `rxquery` for query
+' expressions. 
+
+***
+
+## Extending Existing Builders
+
+***
+
+## Three Rings for the Elven-kings under the sky
+
+***
+
+## [Freya](https://freya.io/)
+
+***
+
+## [ILBuilder](https://github.com/kbattocchi/ILBuilder)
+## [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
 
 ***
 
@@ -212,66 +421,12 @@
 
 ## References
 
-1. 
-2. 
+1. [Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
+2. [Query Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions)
+3. [Computation Expresssions in F# 3.0](https://vimeo.com/47218436)
+4. [Introducing F# Asynchronous Workflows](https://blogs.msdn.microsoft.com/dsyme/2007/10/10/introducing-f-asynchronous-workflows/)
+5. [The F# Computation Expression Zoo](http://tomasp.net/academic/papers/computation-zoo/computation-zoo.pdf)
+6. [F# for fun and profit](https://fsharpforfunandprofit.com/series/computation-expressions.html)
 
 ***
 *)
-
-(*** hide ***)
-open System
-open System.Net
-
-(*** define: seq-example ***)
-seq {
-    for i in 1..10 do
-    yield i
-}
-(*** define-output: seq-example-out ***)
-seq {
-    for i in 1..10 do
-    yield i
-}
-
-(*** define: monoid-example ***)
-let xs = seq { for i in 1..10 -> i }
-let ys = seq { for i in 11..20 -> i }
-seq {
-    yield! xs
-    yield! ys
-}
-(*** define-output: monoid-example-out ***)
-seq {
-    yield! xs
-    yield! ys
-}
-
-(*** define: async-example ***)
-async {
-    let req = WebRequest.Create("http://openfsharp.org/")
-    let! resp = req.AsyncGetResponse()
-    use stream = resp.GetResponseStream()
-    let! bytes = stream.AsyncRead(91)
-    let text = Text.Encoding.UTF8.GetString(bytes)
-    return (resp :?> HttpWebResponse).StatusCode, text
-}
-|> Async.RunSynchronously
-(*** define-output: async-example-out ***)
-async {
-    let req = WebRequest.Create("http://openfsharp.org/")
-    let! resp = req.AsyncGetResponse()
-    use stream = resp.GetResponseStream()
-    let! bytes = stream.AsyncRead(91)
-    let text = Text.Encoding.UTF8.GetString(bytes)
-    return (resp :?> HttpWebResponse).StatusCode, text
-}
-|> Async.RunSynchronously
-
-(*** define: option-builder ***)
-type OptionBuilder() =
-    member __.Return(x) = Some x
-    member __.Bind(m, f) = Option.bind f m
-let opt = OptionBuilder()
-opt { return 1 }
-(*** define-output: option-builder-out ***)
-opt { return 1 }
