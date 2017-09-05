@@ -15,6 +15,7 @@ open System
 open System.Net
 open System.Reactive
 open System.Reactive.Linq
+open System.Threading.Tasks
 open FSharp.Control.Reactive
 open FSharp.Control.Reactive.Builders
 
@@ -431,15 +432,15 @@ type RxQueryBuilder with
 type FSharp.Control.AsyncBuilder with
 
     [<CustomOperation("and!", IsLikeZip=true)>]
-    member __.Merge(x, y, f) =
+    member __.Merge(x, y,
+                    [<ProjectionParameter>] resultSelector : _ -> _) =
         async {
-            let! token = Async.CancellationToken
             let! x' = Async.StartChildAsTask x
             let! y' = Async.StartChildAsTask y
-            do System.Threading.Tasks.Task.WaitAll([|x';y'|], cancellationToken = token)
+            do Task.WaitAll(x',y')
             let! x'' = Async.AwaitTask x'
             let! y'' = Async.AwaitTask y'
-            return f x'' y''
+            return resultSelector x'' y''
         }
 
     member __.For(m, f) = __.Bind(m, f)
@@ -528,16 +529,161 @@ printfn "comp3 ran in %Oms with result %i" sw.ElapsedMilliseconds result3
 
 ***
 
+### Caveat emptor
+*)
+
+type FSharp.Control.AsyncBuilder with
+
+    [<CustomOperation("and!", IsLikeZip=true)>]
+    member __.Merge(x: Task<'a>, y: Task<'b>,
+                    [<ProjectionParameter>] resultSelector : _ -> _) =
+        async {
+            do Task.WaitAll(x,y)
+            let! x' = Async.AwaitTask x
+            let! y' = Async.AwaitTask y
+            return resultSelector x' y'
+        }
+
+(**
+
+' You may assume that method overloading is as easy as adding another,
+' similar named method. After all, many people extend `AsyncBuilder`
+' with implementations of `Bind` that deal with `Task<'T>` and `Task`
+' so that they don't have to deal with the `Async.AwaitTask`.
+' Unfortunately, that's not allowed with custom operations. That is
+' to say, you can define the overload ...
+
+***
+
+*)
+
+async {
+    for x in Task.FromResult(1) do
+    ``and!`` y in Task.FromResult(2)
+    return x + y
+}
+
+(**
+
+> The custom operation 'and!' refers to a method which is overloaded.
+> The implementations of custom operations may not be overloaded.<br />
+> custom operation: and! var in collection <br />
+> Calls AsyncBuilder.Merge
+
+' But it will cause the custom operation to be unusable.
+
+***
+
+### Overloading workaround
+
+*)
+
+module Inference =
+    type Defaults =
+        | Defaults
+        static member Value (x: Async<int>) =
+            x
+        static member inline Value (x: int) =
+            async.Return x
+        static member inline Value (x: string) =
+            int x |> async.Return
+
+    let inline defaults (a: ^a, _: ^b) =
+        ((^a or ^b) : (static member Value : ^a -> Async<_>) a)
+    
+    let inline infer (a: 'a) =
+        defaults(a, Defaults)
+
+(*** hide ***)
+Inference.infer (async { return 1 })
+Inference.infer 1
+Inference.infer "1"
+
+(**
+
+' The Async Zip example is not really a good one. If you want to
+' allow both Async and Task<'T> in the same workflow, you're going to
+' have to ultimately pick one, and that usually means Task<'T>, which
+' changes the semantics of F# Async computations considerably. The
+' workaround should let you specify one of several types, typically
+' including a wrapped value, in this case, an Async<int>.
+
+***
+
+### Overloading workaround (cont)
+
+*)
+
+type FSharp.Control.AsyncBuilder with
+    [<CustomOperation("add", MaintainsVariableSpaceUsingBind=true)>]
+    member inline __.Add(m, x) =
+        async {
+            let! a = m
+            let! b = Inference.infer x
+            return a + b
+        }
+
+(*** define-output: async-add ***)
+async {
+    let! m = async.Return 0
+    add "1"
+    add "2"
+} |> Async.RunSynchronously
+
+(*** include-it: async-add ***)
+
+(**
+
+***
+
 ## Three Rings for the Elven-kings under the sky
 
+' The rings of the elven kings were supposedly very powerful.
+' We've seens some interesting building blocks. It's time to
+' put everything together and find out what we can really do
+' with computation expressions.
+' To start, I'll reiterate the point of this talk: to extend F#.
+' How might we accomplish this? We have seen we can extend the
+' available keywords by means of custom operations within computation
+' expressions, though we must remember we have to work within
+' certain constraints defined by the feature.
+
 ***
 
-## [Freya](https://freya.io/)
+### Use cases
+
+1. Domain specific languages
+2. Protocols
+3. Session types?
 
 ***
 
-## [ILBuilder](https://github.com/kbattocchi/ILBuilder)
-## [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
+### Domain specific languages
+
+Implementations of Common Intermediate Language (CIL):
+
+- [ILBuilder](https://github.com/kbattocchi/ILBuilder)
+- [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
+
+***
+
+### Protocols
+
+[Freya](https://freya.io/) implements the HTTP state machine
+
+***
+
+### Session Types
+
+' Session types are under active research. The idea is to provide a
+' flexible type checking mechanism around protocols covering multiple
+' parties. HTTP is an application protocol but only stipulates server
+' behavior. Session types aim to cover client/server, multiple clients,
+' and even actors.
+' Consider how Type Providers made accessing data sources almost trivial
+' (at least once you had the type provider). Session types could
+' provide type safety on various types of workflows across multiple
+' agents.
 
 ***
 
