@@ -636,25 +636,23 @@ async {
 
 ***
 
+### Other Limitations
+
+' TODO
+
+***
+
 ## Three Rings for the Elven-kings under the sky
 
 ' The rings of the elven kings were supposedly very powerful.
 ' We've seens some interesting building blocks. It's time to
 ' put everything together and find out what we can really do
 ' with computation expressions.
-' To start, I'll reiterate the point of this talk: to extend F#.
+' Let's return to our motivation: to extend F#.
 ' How might we accomplish this? We have seen we can extend the
 ' available keywords by means of custom operations within computation
 ' expressions, though we must remember we have to work within
 ' certain constraints defined by the feature.
-
-***
-
-### Use cases
-
-1. Domain specific languages
-2. Protocols
-3. Session types?
 
 ***
 
@@ -665,25 +663,144 @@ Implementations of Common Intermediate Language (CIL):
 - [ILBuilder](https://github.com/kbattocchi/ILBuilder)
 - [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
 
+*)
+
+(*** include: licensetocil ***)
+
+(**
+
+' Everyone is familiar with the concept of domain specific
+' languages. Scott is going over this same topic in the
+' other room. So CEs can enable embedded domain specific
+' languages but are not necessary for that purpose.
+
 ***
 
 ### Protocols
 
 [Freya](https://freya.io/) implements the HTTP state machine
 
+*)
+
+(*** include: freya-machine ***)
+
+(*** include: freya-router ***)
+
+(**
+
+' Protocols are another avenue we frequently ignore. HTTP
+' is an application protocol often dismissed as a transport
+' protocol. Both are protocols for networked communications.
+' In the case of HTTP, the server behavior is what's really
+' encoded. Clients may behave in almost any way they please.
+' TCP/IP, UDP, etc. are all protocols and define certain
+' characterisitcs of behavior.
+
 ***
 
 ### Session Types
 
+    module example;
+
+    type <xsd> "{http://www.acme.com/types}Greetings" from "http://www.acme.com/types/Greetings.xsd" as Greetings;
+    type <xsd> "{http://www.acme.com/types}Compliments" from "http://www.acme.com/types/Compliments.xsd" as Compliments;
+    type <xsd> "{http://www.acme.com/types}Salutations" from "http://www.acme.com/types/Salutations.xsd" as Salutations;
+
+    global protocol HelloWorld(role Me, role World) {
+        hello(Greetings) from Me to World;
+        choice at World {
+            goodMorning(Compliments) from World to Me;
+        } or {
+            goodAfternoon(Salutations) from World to Me;
+        }
+    }
+
+' This leads us to Session Types.
+' Who has heard of session types?
 ' Session types are under active research. The idea is to provide a
 ' flexible type checking mechanism around protocols covering multiple
 ' parties. HTTP is an application protocol but only stipulates server
-' behavior. Session types aim to cover client/server, multiple clients,
-' and even actors.
+' behavior. Session types aim to cover multiple clients, including actors.
 ' Consider how Type Providers made accessing data sources almost trivial
 ' (at least once you had the type provider). Session types could
 ' provide type safety on various types of workflows across multiple
 ' agents.
+' This is an example of Scribble, a language for defining protocols
+' for use with session types. I think we could encode Scribble
+' as a computation expression and provide session types within
+' F#.
+
+***
+
+### How?
+
+' This is all well and good, but how would you do something like
+' this?
+' The trick is thinking beyond the obvious. The obvious thing
+' to do, and the trap that the monad path leads you, is to think
+' of computation expressions as providing computations around
+' a specific data type or data structure, e.g. Async, Seq, Option,
+' etc.
+' However, you don't have to limit yourself to the visible type.
+' Async works this way. There are many types that make up Async
+' workflows. Query Expressions, too, hide a lot more than we
+' saw earlier.
+
+***
+
+### Query Expressions Revisited
+
+*)
+
+(*** hide ***)
+#r "System.Core.dll"
+#r "System.Xml.Linq.dll"
+open System.Xml.Linq
+
+(*** define-output: xml-query ***)
+let xn s = XName.Get s
+let xml = """<people>
+    <person firstName="Mathias" lastName="Brandewinder" />
+    <person firstName="Andrew" lastName="Cherry" />
+    <person firstName="" lastName="Riley" />
+</people>"""
+let doc = XDocument.Parse xml
+query {
+    for el in doc.Descendants(xn "person") do
+    where (el.Attribute(xn "firstName").Value <> "")
+    select (el.Attribute(xn "lastName").Value)
+}
+
+(*** include-it: xml-query ***)
+
+(**
+
+' F#'s query expressions appear to work with Seq<'T>, but
+' actually works with expressions and is intended to be used
+' with LINQ queries.
+' The most obvious example would be working with a database,
+' and you can find an example of this in the Microsoft docs.
+' Here we look at an example using an XDocument, which also
+' uses LINQ.
+' While the built-in query expression works just fine with
+' Seq<'T>, it is clearly doing more under the covers.
+
+***
+
+### Freya's Graph
+
+' Freya does something similar. It wraps a bit of state behind
+' it's computation and then uses a graph model to facilitate
+' the request/response state machine of HTTP. It exposes hooks
+' to tap into the state machine, rather than having programmers
+' specify exactly how to process each request. Freya goes even
+' further in allowing programmers to compose the graph itself
+' with the `using` expression.
+' This is the goal of declarative programming, after all:
+' specify the what, not the how.
+' The point is to remind you to think beyond the immediate data
+' structure. I don't think we've reached the limit to what we
+' can achieve with computation expressions.
 
 ***
 
@@ -738,3 +855,49 @@ Implementations of Common Intermediate Language (CIL):
 
 ***
 *)
+
+(*** hide ***)
+open Freya.Core
+open Freya.Machines.Http
+open Freya.Types.Http
+open Freya.Routers.Uri.Template
+open LicenseToCIL
+open LicenseToCIL.Builder
+open LicenseToCIL.Ops
+
+(*** define: licensetocil ***)
+cil {
+    yield ldc'i4 1
+    yield ldc'i4 2
+    yield add
+    yield ldc'i4 3
+    yield add
+    yield ret
+} |> toDelegate<Func<int>> "myFunction1"
+
+(*** define: freya-name ***)
+let name =
+    freya {
+        let! name = Freya.Optic.get (Route.atom_ "name")
+
+        match name with
+        | Some name -> return name
+        | _ -> return "World" }
+
+(*** define: freya-hello ***)
+let hello =
+    freya {
+        let! name = name
+
+        return Represent.text (sprintf "Hello %s!" name) }
+
+(*** define: freya-machine ***)
+let machine =
+    freyaMachine {
+        methods [GET; HEAD; OPTIONS]
+        handleOk hello }
+
+(*** define: freya-router ***)
+let router =
+    freyaRouter {
+        resource "/hello{/name}" machine }

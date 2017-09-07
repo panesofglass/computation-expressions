@@ -5,8 +5,10 @@ framework: net462
 
 nuget Freya.Hopac prerelease
 nuget FSharp.Control.Reactive
+nuget LicenseToCIL
 
 group Build
+    generate_load_scripts: false
     source https://nuget.org/api/v2
 
     nuget FsReveal

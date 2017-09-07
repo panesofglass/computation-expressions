@@ -143,6 +143,7 @@ NUGET
       Hopac (>= 0.3.23)
     Hopac (0.3.23)
       FSharp.Core (>= 3.1.2.5)
+    LicenseToCIL (0.3)
     System.Reactive (3.1.1)
       System.Reactive.PlatformServices (>= 3.1.1)
       System.Reactive.Windows.Threading (>= 3.1.1)
@@ -157,6 +158,7 @@ NUGET
       System.Reactive.Core (>= 3.1.1)
 
 GROUP Build
+GENERATE-LOAD-SCRIPTS: OFF
 NUGET
   remote: https://www.nuget.org/api/v2
     FAKE (4.63)
