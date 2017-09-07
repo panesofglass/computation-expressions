@@ -206,6 +206,59 @@
 <div class="tip" id="fs158">val b : &#39;b (requires member ( + ))</div>
 <div class="tip" id="fs159">val m : int</div>
 <div class="tip" id="fs160">custom operation: add (&#39;d)<br /><br />Calls AsyncBuilder.Add </div>
+<div class="tip" id="fs161">namespace System.Xml</div>
+<div class="tip" id="fs162">namespace System.Xml.Linq</div>
+<div class="tip" id="fs163">val xn : s:string -&gt; XName<br /><br />Full name: Index.xn</div>
+<div class="tip" id="fs164">val s : string</div>
+<div class="tip" id="fs165">type XName =<br />&#160;&#160;member Equals : obj:obj -&gt; bool<br />&#160;&#160;member GetHashCode : unit -&gt; int<br />&#160;&#160;member LocalName : string<br />&#160;&#160;member Namespace : XNamespace<br />&#160;&#160;member NamespaceName : string<br />&#160;&#160;member ToString : unit -&gt; string<br />&#160;&#160;static member Get : expandedName:string -&gt; XName + 1 overload<br /><br />Full name: System.Xml.Linq.XName</div>
+<div class="tip" id="fs166">XName.Get(expandedName: string) : XName<br />XName.Get(localName: string, namespaceName: string) : XName</div>
+<div class="tip" id="fs167">val xml : string<br /><br />Full name: Index.xml</div>
+<div class="tip" id="fs168">val doc : XDocument<br /><br />Full name: Index.doc</div>
+<div class="tip" id="fs169">Multiple items<br />type XDocument =<br />&#160;&#160;inherit XContainer<br />&#160;&#160;new : unit -&gt; XDocument + 3 overloads<br />&#160;&#160;member Declaration : XDeclaration with get, set<br />&#160;&#160;member DocumentType : XDocumentType<br />&#160;&#160;member NodeType : XmlNodeType<br />&#160;&#160;member Root : XElement<br />&#160;&#160;member Save : fileName:string -&gt; unit + 6 overloads<br />&#160;&#160;member WriteTo : writer:XmlWriter -&gt; unit<br />&#160;&#160;static member Load : uri:string -&gt; XDocument + 7 overloads<br />&#160;&#160;static member Parse : text:string -&gt; XDocument + 1 overload<br /><br />Full name: System.Xml.Linq.XDocument<br /><br />--------------------<br />XDocument() : unit<br />XDocument([&lt;ParamArray&gt;] content: obj []) : unit<br />XDocument(other: XDocument) : unit<br />XDocument(declaration: XDeclaration, [&lt;ParamArray&gt;] content: obj []) : unit</div>
+<div class="tip" id="fs170">XDocument.Parse(text: string) : XDocument<br />XDocument.Parse(text: string, options: LoadOptions) : XDocument</div>
+<div class="tip" id="fs171">val el : XElement</div>
+<div class="tip" id="fs172">XContainer.Descendants() : Collections.Generic.IEnumerable&lt;XElement&gt;<br />XContainer.Descendants(name: XName) : Collections.Generic.IEnumerable&lt;XElement&gt;</div>
+<div class="tip" id="fs173">XElement.Attribute(name: XName) : XAttribute</div>
+<div class="tip" id="fs174">Multiple items<br />namespace Freya<br /><br />--------------------<br />module Freya<br /><br />from Freya.Core.Optics</div>
+<div class="tip" id="fs175">namespace Freya.Core</div>
+<div class="tip" id="fs176">Multiple items<br />module Freya<br /><br />from Freya.Core.Inference<br /><br />--------------------<br />module Freya<br /><br />from Freya.Core<br /><br />--------------------<br />namespace Freya<br /><br />--------------------<br />module Freya<br /><br />from Freya.Core.Optics<br /><br />--------------------<br />type Freya&lt;&#39;a&gt; = State -&gt; Hopac.Job&lt;FreyaResult&lt;&#39;a&gt;&gt;<br /><br />Full name: Freya.Core.Freya&lt;_&gt;</div>
+<div class="tip" id="fs177">namespace Freya.Machines</div>
+<div class="tip" id="fs178">namespace Freya.Machines.Http</div>
+<div class="tip" id="fs179">namespace Freya.Types</div>
+<div class="tip" id="fs180">namespace Freya.Types.Http</div>
+<div class="tip" id="fs181">namespace Freya.Routers</div>
+<div class="tip" id="fs182">namespace Freya.Routers.Uri</div>
+<div class="tip" id="fs183">namespace Freya.Routers.Uri.Template</div>
+<div class="tip" id="fs184">namespace LicenseToCIL</div>
+<div class="tip" id="fs185">module Builder<br /><br />from LicenseToCIL</div>
+<div class="tip" id="fs186">module Ops<br /><br />from LicenseToCIL</div>
+<div class="tip" id="fs187">val cil : CILBuilder<br /><br />Full name: LicenseToCIL.Builder.cil</div>
+<div class="tip" id="fs188">val ldc&#39;i4 : int -&gt; Op&lt;&#39;x,Stack.S&lt;&#39;x&gt;&gt;<br /><br />Full name: LicenseToCIL.Ops.ldc&#39;i4</div>
+<div class="tip" id="fs189">val add : Op&lt;Stack.S&lt;Stack.S&lt;&#39;x&gt;&gt;,Stack.S&lt;&#39;x&gt;&gt;<br /><br />Full name: LicenseToCIL.Ops.add</div>
+<div class="tip" id="fs190">val ret : Op&lt;Stack.S&lt;Stack.E&gt;,&#39;x&gt;<br /><br />Full name: LicenseToCIL.Ops.ret</div>
+<div class="tip" id="fs191">val toDelegate : name:string -&gt; op:Op&lt;Stack.E,Stack.E&gt; -&gt; #Delegate<br /><br />Full name: LicenseToCIL.Delegates.toDelegate</div>
+<div class="tip" id="fs192">val name : Freya&lt;string&gt;<br /><br />Full name: Index.name</div>
+<div class="tip" id="fs193">val freya : FreyaBuilder<br /><br />Full name: Freya.Core.Builder.freya</div>
+<div class="tip" id="fs194">val name : string option</div>
+<div class="tip" id="fs195">module Optic<br /><br />from Freya.Core.Optics.Freya</div>
+<div class="tip" id="fs196">val get : o:&#39;c -&gt; Freya&lt;&#39;a&gt; (requires member ( ^. ))<br /><br />Full name: Freya.Core.Optics.Freya.Optic.get</div>
+<div class="tip" id="fs197">module Route<br /><br />from Freya.Routers.Uri.Template</div>
+<div class="tip" id="fs198">val atom_ : key:string -&gt; Aether.Prism&lt;State,string&gt;<br /><br />Full name: Freya.Routers.Uri.Template.Route.atom_</div>
+<div class="tip" id="fs199">val name : string</div>
+<div class="tip" id="fs200">val hello : Freya&lt;Representation&gt;<br /><br />Full name: Index.hello</div>
+<div class="tip" id="fs201">module Represent<br /><br />from Freya.Machines.Http</div>
+<div class="tip" id="fs202">val text : text:string -&gt; Representation<br /><br />Full name: Freya.Machines.Http.Represent.text</div>
+<div class="tip" id="fs203">val sprintf : format:Printf.StringFormat&lt;&#39;T&gt; -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.sprintf</div>
+<div class="tip" id="fs204">val machine : HttpMachine<br /><br />Full name: Index.machine</div>
+<div class="tip" id="fs205">val freyaMachine : HttpMachineBuilder<br /><br />Full name: Freya.Machines.Http.Builder.freyaMachine</div>
+<div class="tip" id="fs206">custom operation: methods (&#39;a)<br /><br />Calls HttpMachineBuilder.Methods </div>
+<div class="tip" id="fs207">union case Method.GET: Method</div>
+<div class="tip" id="fs208">union case Method.HEAD: Method</div>
+<div class="tip" id="fs209">union case Method.OPTIONS: Method</div>
+<div class="tip" id="fs210">custom operation: handleOk (&#39;a)<br /><br />Calls HttpMachineBuilder.HandleOk </div>
+<div class="tip" id="fs211">val router : UriTemplateRouter<br /><br />Full name: Index.router</div>
+<div class="tip" id="fs212">val freyaRouter : UriTemplateRouterBuilder<br /><br />Full name: Freya.Routers.Uri.Template.Builder.freyaRouter</div>
+<div class="tip" id="fs213">custom operation: resource (&#39;a) (&#39;b)<br /><br />Calls UriTemplateRouterBuilder.Resource </div>
 
         <!-- Any section element inside of this container is displayed as a slide -->
         <div class="slides">
@@ -892,26 +945,24 @@ including a wrapped value, in this case, an Async<int>.<br/>
 <table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
 </section>
 <section >
+<h3>Other Limitations</h3>
+<aside class="notes">
+TODO<br/>
+</aside>
+</section>
+<section >
 <h2>Three Rings for the Elven-kings under the sky</h2>
 <aside class="notes">
 The rings of the elven kings were supposedly very powerful.<br/>
 We've seens some interesting building blocks. It's time to<br/>
 put everything together and find out what we can really do<br/>
 with computation expressions.<br/>
-To start, I'll reiterate the point of this talk: to extend F#.<br/>
+Let's return to our motivation: to extend F#.<br/>
 How might we accomplish this? We have seen we can extend the<br/>
 available keywords by means of custom operations within computation<br/>
 expressions, though we must remember we have to work within<br/>
 certain constraints defined by the feature.<br/>
 </aside>
-</section>
-<section >
-<h3>Use cases</h3>
-<ol>
-<li>Domain specific languages</li>
-<li>Protocols</li>
-<li>Session types?</li>
-</ol>
 </section>
 <section >
 <h3>Domain specific languages</h3>
@@ -920,23 +971,193 @@ certain constraints defined by the feature.<br/>
 <li><a href="https://github.com/kbattocchi/ILBuilder">ILBuilder</a></li>
 <li><a href="https://github.com/rspeele/LicenseToCIL">LicenseToCIL</a></li>
 </ul>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span onmouseout="hideTip(event, 'fs187', 499)" onmouseover="showTip(event, 'fs187', 499)" class="i">cil</span> {
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs188', 500)" onmouseover="showTip(event, 'fs188', 500)" class="f">ldc&#39;i4</span> <span class="n">1</span>
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs188', 501)" onmouseover="showTip(event, 'fs188', 501)" class="f">ldc&#39;i4</span> <span class="n">2</span>
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs189', 502)" onmouseover="showTip(event, 'fs189', 502)" class="f">add</span>
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs188', 503)" onmouseover="showTip(event, 'fs188', 503)" class="f">ldc&#39;i4</span> <span class="n">3</span>
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs189', 504)" onmouseover="showTip(event, 'fs189', 504)" class="f">add</span>
+    <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs190', 505)" onmouseover="showTip(event, 'fs190', 505)" class="f">ret</span>
+} <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs191', 506)" onmouseover="showTip(event, 'fs191', 506)" class="f">toDelegate</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs96', 507)" onmouseover="showTip(event, 'fs96', 507)" class="t">Func</span><span class="o">&lt;</span><span onmouseout="hideTip(event, 'fs144', 508)" onmouseover="showTip(event, 'fs144', 508)" class="t">int</span><span class="o">&gt;</span><span class="o">&gt;</span> <span class="s">&quot;myFunction1&quot;</span>
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+Everyone is familiar with the concept of domain specific<br/>
+languages. Scott is going over this same topic in the<br/>
+other room. So CEs can enable embedded domain specific<br/>
+languages but are not necessary for that purpose.<br/>
+</aside>
 </section>
 <section >
 <h3>Protocols</h3>
 <p><a href="https://freya.io/">Freya</a> implements the HTTP state machine</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs204', 529)" onmouseover="showTip(event, 'fs204', 529)" class="i">machine</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs205', 530)" onmouseover="showTip(event, 'fs205', 530)" class="i">freyaMachine</span> {
+        <span onmouseout="hideTip(event, 'fs206', 531)" onmouseover="showTip(event, 'fs206', 531)" class="k">methods</span> [<span onmouseout="hideTip(event, 'fs207', 532)" onmouseover="showTip(event, 'fs207', 532)" class="p">GET</span>; <span onmouseout="hideTip(event, 'fs208', 533)" onmouseover="showTip(event, 'fs208', 533)" class="p">HEAD</span>; <span onmouseout="hideTip(event, 'fs209', 534)" onmouseover="showTip(event, 'fs209', 534)" class="p">OPTIONS</span>]
+        <span onmouseout="hideTip(event, 'fs210', 535)" onmouseover="showTip(event, 'fs210', 535)" class="k">handleOk</span> <span onmouseout="hideTip(event, 'fs200', 536)" onmouseover="showTip(event, 'fs200', 536)" class="f">hello</span> }
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs211', 537)" onmouseover="showTip(event, 'fs211', 537)" class="i">router</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs212', 538)" onmouseover="showTip(event, 'fs212', 538)" class="i">freyaRouter</span> {
+        <span onmouseout="hideTip(event, 'fs213', 539)" onmouseover="showTip(event, 'fs213', 539)" class="k">resource</span> <span class="s">&quot;/hello{/name}&quot;</span> <span onmouseout="hideTip(event, 'fs204', 540)" onmouseover="showTip(event, 'fs204', 540)" class="i">machine</span> }
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+Protocols are another avenue we frequently ignore. HTTP<br/>
+is an application protocol often dismissed as a transport<br/>
+protocol. Both are protocols for networked communications.<br/>
+In the case of HTTP, the server behavior is what's really<br/>
+encoded. Clients may behave in almost any way they please.<br/>
+TCP/IP, UDP, etc. are all protocols and define certain<br/>
+characterisitcs of behavior.<br/>
+</aside>
 </section>
 <section >
 <h3>Session Types</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">module</span> <span class="i">example</span>;
+
+<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Greetings&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Greetings.xsd&quot;</span> <span class="k">as</span> <span class="i">Greetings</span>;
+<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Compliments&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Compliments.xsd&quot;</span> <span class="k">as</span> <span class="i">Compliments</span>;
+<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Salutations&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Salutations.xsd&quot;</span> <span class="k">as</span> <span class="i">Salutations</span>;
+
+<span class="k">global</span> <span class="i">protocol</span> <span class="i">HelloWorld</span>(<span class="i">role</span> <span class="i">Me</span>, <span class="i">role</span> <span class="i">World</span>) {
+    <span class="i">hello</span>(<span class="i">Greetings</span>) <span class="i">from</span> <span class="i">Me</span> <span class="k">to</span> <span class="i">World</span>;
+    <span class="i">choice</span> <span class="i">at</span> <span class="i">World</span> {
+        <span class="i">goodMorning</span>(<span class="i">Compliments</span>) <span class="i">from</span> <span class="i">World</span> <span class="k">to</span> <span class="i">Me</span>;
+    } <span class="k">or</span> {
+        <span class="i">goodAfternoon</span>(<span class="i">Salutations</span>) <span class="i">from</span> <span class="i">World</span> <span class="k">to</span> <span class="i">Me</span>;
+    }
+}
+</code></pre></td>
+</tr>
+</table>
 <aside class="notes">
+This leads us to Session Types.<br/>
+Who has heard of session types?<br/>
 Session types are under active research. The idea is to provide a<br/>
 flexible type checking mechanism around protocols covering multiple<br/>
 parties. HTTP is an application protocol but only stipulates server<br/>
-behavior. Session types aim to cover client/server, multiple clients,<br/>
-and even actors.<br/>
+behavior. Session types aim to cover multiple clients, including actors.<br/>
 Consider how Type Providers made accessing data sources almost trivial<br/>
 (at least once you had the type provider). Session types could<br/>
 provide type safety on various types of workflows across multiple<br/>
 agents.<br/>
+This is an example of Scribble, a language for defining protocols<br/>
+for use with session types. I think we could encode Scribble<br/>
+as a computation expression and provide session types within<br/>
+F#.<br/>
+</aside>
+</section>
+<section >
+<h3>How?</h3>
+<aside class="notes">
+This is all well and good, but how would you do something like<br/>
+this?<br/>
+The trick is thinking beyond the obvious. The obvious thing<br/>
+to do, and the trap that the monad path leads you, is to think<br/>
+of computation expressions as providing computations around<br/>
+a specific data type or data structure, e.g. Async, Seq, Option,<br/>
+etc.<br/>
+However, you don't have to limit yourself to the visible type.<br/>
+Async works this way. There are many types that make up Async<br/>
+workflows. Query Expressions, too, hide a lot more than we<br/>
+saw earlier.<br/>
+</aside>
+</section>
+<section >
+<h3>Query Expressions Revisited</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs163', 459)" onmouseover="showTip(event, 'fs163', 459)" class="f">xn</span> <span onmouseout="hideTip(event, 'fs164', 460)" onmouseover="showTip(event, 'fs164', 460)" class="i">s</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs165', 461)" onmouseover="showTip(event, 'fs165', 461)" class="t">XName</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs166', 462)" onmouseover="showTip(event, 'fs166', 462)" class="f">Get</span> <span onmouseout="hideTip(event, 'fs164', 463)" onmouseover="showTip(event, 'fs164', 463)" class="i">s</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs167', 464)" onmouseover="showTip(event, 'fs167', 464)" class="i">xml</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;people&gt;</span>
+<span class="s">    &lt;person firstName=&quot;Mathias&quot; lastName=&quot;Brandewinder&quot; /&gt;</span>
+<span class="s">    &lt;person firstName=&quot;Andrew&quot; lastName=&quot;Cherry&quot; /&gt;</span>
+<span class="s">    &lt;person firstName=&quot;&quot; lastName=&quot;Riley&quot; /&gt;</span>
+<span class="s">&lt;/people&gt;&quot;&quot;&quot;</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs168', 465)" onmouseover="showTip(event, 'fs168', 465)" class="i">doc</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs169', 466)" onmouseover="showTip(event, 'fs169', 466)" class="t">XDocument</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs170', 467)" onmouseover="showTip(event, 'fs170', 467)" class="f">Parse</span> <span onmouseout="hideTip(event, 'fs167', 468)" onmouseover="showTip(event, 'fs167', 468)" class="i">xml</span>
+<span onmouseout="hideTip(event, 'fs73', 469)" onmouseover="showTip(event, 'fs73', 469)" class="i">query</span> {
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs171', 470)" onmouseover="showTip(event, 'fs171', 470)" class="i">el</span> <span class="k">in</span> <span onmouseout="hideTip(event, 'fs168', 471)" onmouseover="showTip(event, 'fs168', 471)" class="i">doc</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs172', 472)" onmouseover="showTip(event, 'fs172', 472)" class="f">Descendants</span>(<span onmouseout="hideTip(event, 'fs163', 473)" onmouseover="showTip(event, 'fs163', 473)" class="f">xn</span> <span class="s">&quot;person&quot;</span>) <span class="k">do</span>
+    <span onmouseout="hideTip(event, 'fs74', 474)" onmouseover="showTip(event, 'fs74', 474)" class="k">where</span> (<span onmouseout="hideTip(event, 'fs171', 475)" onmouseover="showTip(event, 'fs171', 475)" class="i">el</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs173', 476)" onmouseover="showTip(event, 'fs173', 476)" class="f">Attribute</span>(<span onmouseout="hideTip(event, 'fs163', 477)" onmouseover="showTip(event, 'fs163', 477)" class="f">xn</span> <span class="s">&quot;firstName&quot;</span>)<span class="o">.</span><span class="i">Value</span> <span class="o">&lt;&gt;</span> <span class="s">&quot;&quot;</span>)
+    <span onmouseout="hideTip(event, 'fs75', 478)" onmouseover="showTip(event, 'fs75', 478)" class="k">select</span> (<span onmouseout="hideTip(event, 'fs171', 479)" onmouseover="showTip(event, 'fs171', 479)" class="i">el</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs173', 480)" onmouseover="showTip(event, 'fs173', 480)" class="f">Attribute</span>(<span onmouseout="hideTip(event, 'fs163', 481)" onmouseover="showTip(event, 'fs163', 481)" class="f">xn</span> <span class="s">&quot;lastName&quot;</span>)<span class="o">.</span><span class="i">Value</span>)
+}
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>seq ["Brandewinder"; "Cherry"]</code></pre></td></tr></table>
+<aside class="notes">
+F#'s query expressions appear to work with Seq<'T>, but<br/>
+actually works with expressions and is intended to be used<br/>
+with LINQ queries.<br/>
+The most obvious example would be working with a database,<br/>
+and you can find an example of this in the Microsoft docs.<br/>
+Here we look at an example using an XDocument, which also<br/>
+uses LINQ.<br/>
+While the built-in query expression works just fine with<br/>
+Seq<'T>, it is clearly doing more under the covers.<br/>
+</aside>
+</section>
+<section >
+<h3>Freya's Graph</h3>
+<aside class="notes">
+Freya does something similar. It wraps a bit of state behind<br/>
+it's computation and then uses a graph model to facilitate<br/>
+the request/response state machine of HTTP. It exposes hooks<br/>
+to tap into the state machine, rather than having programmers<br/>
+specify exactly how to process each request. Freya goes even<br/>
+further in allowing programmers to compose the graph itself<br/>
+with the `using` expression.<br/>
+This is the goal of declarative programming, after all:<br/>
+specify the what, not the how.<br/>
+The point is to remind you to think beyond the immediate data<br/>
+structure. I don't think we've reached the limit to what we<br/>
+can achieve with computation expressions.<br/>
 </aside>
 </section>
 <section >
@@ -987,6 +1208,8 @@ expressions-as-monad-encodings that many fall into.<br/>
 <li><a href="https://fsharpforfunandprofit.com/series/computation-expressions.html">F# for fun and profit</a></li>
 <li><a href="https://github.com/fsharp/fslang-suggestions/issues/579">Support let! .. and... for applicative functors</a></li>
 </ol>
+</section>
+<section >
 </section>
 
 
