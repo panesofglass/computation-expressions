@@ -300,6 +300,7 @@ for writing correct programs for a given domain.<br/>
 </aside>
 </section>
 <section >
+<section >
 <h2>Examples</h2>
 <aside class="notes">
 Let's begin with a few examples built into the language.<br/>
@@ -407,6 +408,7 @@ Async computations are delayed and require a call to start them.<br/>
 Not all computation expressions have to provide this delay.<br/>
 </aside>
 </section>
+</section>
 <section >
 <h2>Patterns</h2>
 <aside class="notes">
@@ -447,6 +449,7 @@ the bottom of the first stanza then works its way up.<br/>
 </section>
 <section >
 <h2>One for the Dark Lord on his dark throne</h2>
+<p><a href="http://stock-wallpapers.com/wp-content/uploads/2015/01/Lord-of-the-Rings-Wallpapers-Free-Download-9.jpg"><img src="images/one-ring.jpg" alt="The One Ring" /></a></p>
 <aside class="notes">
 We'll come back to this one in just a bit. The motivating<br/>
 factor for many when first encroaching into computation<br/>
@@ -457,7 +460,9 @@ programmers towards this goal. That leads us to:<br/>
 </aside>
 </section>
 <section >
+<section >
 <h2>Nine for Mortal Men doomed to die</h2>
+<p><a href="http://www.itsvery.net/lord-of-the-rings.html"><img src="images/9rings.jpg" alt="Nine rings for mortal men" /></a></p>
 <aside class="notes">
 The Nine became the Nazgul, slaves to the Dark Lord Sauron.<br/>
 I found this to be true of me when first trying to understand<br/>
@@ -606,18 +611,27 @@ effects explicit.<br/>
 </aside>
 </section>
 <section >
-<h3>Back to the One Ring</h3>
-<ul>
-<li><a href="https://github.com/gusty/FSharpPlus">FSharpPlus</a></li>
-<li><a href="https://github.com/fsprojects/FSharpx.Extras/tree/master/src/FSharpx.Extras/ComputationExpressions">FSharpx.Extras</a></li>
-<li><a href="https://github.com/palladin/Higher">Higher</a></li>
-</ul>
+<h3>Back to the One Ring ...</h3>
+<p><a href="http://lotr.wikia.com/wiki/File:Worst-Does-all-of-this-prequel-Sauron-stuff-line-up-with-LOTR.jpg?file=Worst-Does-all-of-this-prequel-Sauron-stuff-line-up-with-LOTR.jpg"><img src="images/eye-of-sauron.jpg" alt="Eye of Sauron" /></a></p>
+</section>
+<section >
+<p><a href="http://pin.it/gwNsF5C"><img src="images/nazgul.jpg" alt="Nazgul" /></a></p>
 <aside class="notes">
 Much like the Nazgul, seduced by Sauron's power through the One Ring,<br/>
 you may get caught in the trap of trying to implement the one, true monad CE.<br/>
 Many computations can be written almost exactly alike, assuming they are<br/>
 monads. However, F# is not a purely functional, lazy language like Haskell,<br/>
 and the implementations cannot be implemented exactly alike.<br/>
+</aside>
+</section>
+<section >
+<h3>Monad (+more) libraries</h3>
+<ul>
+<li><a href="https://github.com/gusty/FSharpPlus">FSharpPlus</a></li>
+<li><a href="https://github.com/fsprojects/FSharpx.Extras/tree/master/src/FSharpx.Extras/ComputationExpressions">FSharpx.Extras</a></li>
+<li><a href="https://github.com/palladin/Higher">Higher</a></li>
+</ul>
+<aside class="notes">
 The One Ring, in this story, is the Haskell do-notation. FSharpPlus achieved<br/>
 do-notation, which is a single computation expression abstraced over any<br/>
 monadic type. The implementation is interesting and worth your time to<br/>
@@ -626,8 +640,11 @@ Nevertheless, these implementations offer hints to the potential power<br/>
 of F# computation expressions we'll see in a bit.<br/>
 </aside>
 </section>
+</section>
+<section >
 <section >
 <h2>Seven for the Dwarf-lords in their halls of stone</h2>
+<p><a href="https://heirsofdurin.files.wordpress.com/2013/10/dwarf-lords.jpg"><img src="images/dwarf-lords.jpg" alt="Dwarf lords" /></a></p>
 <aside class="notes">
 Okay, let's move towards the light. Or at least a different kind of<br/>
 darkness. The rings of the dwarves don't factor into Tolkien's stories<br/>
@@ -947,11 +964,16 @@ including a wrapped value, in this case, an Async<int>.<br/>
 <section >
 <h3>Other Limitations</h3>
 <aside class="notes">
-TODO<br/>
+You can find additional limitations, specifically with query builders<br/>
+in the error codes defined in FSharp.Core:<br/>
+https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSComp.txt#L1206<br/>
 </aside>
 </section>
+</section>
+<section >
 <section >
 <h2>Three Rings for the Elven-kings under the sky</h2>
+<p><a href="http://www.itsvery.net/lord-of-the-rings.html"><img src="images/elven-rings.jpg" alt="Elven kings" /></a></p>
 <aside class="notes">
 The rings of the elven kings were supposedly very powerful.<br/>
 We've seens some interesting building blocks. It's time to<br/>
@@ -1160,9 +1182,11 @@ structure. I don't think we've reached the limit to what we<br/>
 can achieve with computation expressions.<br/>
 </aside>
 </section>
+</section>
 <section >
 <h2>Questions?</h2>
 </section>
+<section >
 <section >
 <h2>Why Not Macros?</h2>
 <aside class="notes">
@@ -1186,6 +1210,17 @@ Computation expressions don't carry the full power of macros,<br/>
 but they cover the most important use cases to the point you won't<br/>
 likely miss macros.<br/>
 </aside>
+</section>
+<section >
+<h3>Research</h3>
+<h4><a href="https://www.cs.indiana.edu/~sabry/papers/macroml.pdf">MacroML</a></h4>
+<h4><a href="https://pdfs.semanticscholar.org/339f/4370bd02b977fc0d61fca50cc6a0ea26a24b.pdf">MetaML</a></h4>
+<aside class="notes">
+Despite the challenges of implementing macros with statically typed<br/>
+languages, several research efforts are making progress. Follow the<br/>
+links to read more.<br/>
+</aside>
+</section>
 </section>
 <section >
 <h2>Will F# ever get Type Classes?</h2>
