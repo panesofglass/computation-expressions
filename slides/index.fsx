@@ -810,6 +810,8 @@ query {
 
 ### Freya's Graph
 
+![HTTP state diagram](images/http-state-diagram.png)
+
 ' Freya does something similar. It wraps a bit of state behind
 ' it's computation and then uses a graph model to facilitate
 ' the request/response state machine of HTTP. It exposes hooks
@@ -817,6 +819,25 @@ query {
 ' specify exactly how to process each request. Freya goes even
 ' further in allowing programmers to compose the graph itself
 ' with the `using` expression.
+
+---
+
+![Freya's core components](images/freya/components.core.png)
+
+' Freya hides a graph of components that are used to run the
+' application once configured.
+
+---
+
+![Freya's responses](images/freya/specifications.responses.png)
+
+' The graph is composed of smaller graphs.
+
+---
+
+![Freya's validations](images/freya/specifications.validations.png)
+
+' Each exposes functionality that can be tapped into.
 ' This is the goal of declarative programming, after all:
 ' specify the what, not the how.
 ' The point is to remind you to think beyond the immediate data
