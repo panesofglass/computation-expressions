@@ -1167,6 +1167,7 @@ Seq<'T>, it is clearly doing more under the covers.<br/>
 </section>
 <section >
 <h3>Freya's Graph</h3>
+<p><img src="images/http-state-diagram.png" alt="HTTP state diagram" /></p>
 <aside class="notes">
 Freya does something similar. It wraps a bit of state behind<br/>
 it's computation and then uses a graph model to facilitate<br/>
@@ -1175,6 +1176,25 @@ to tap into the state machine, rather than having programmers<br/>
 specify exactly how to process each request. Freya goes even<br/>
 further in allowing programmers to compose the graph itself<br/>
 with the `using` expression.<br/>
+</aside>
+</section>
+<section >
+<p><img src="images/freya/components.core.png" alt="Freya's core components" /></p>
+<aside class="notes">
+Freya hides a graph of components that are used to run the<br/>
+application once configured.<br/>
+</aside>
+</section>
+<section >
+<p><img src="images/freya/specifications.responses.png" alt="Freya's responses" /></p>
+<aside class="notes">
+The graph is composed of smaller graphs.<br/>
+</aside>
+</section>
+<section >
+<p><img src="images/freya/specifications.validations.png" alt="Freya's validations" /></p>
+<aside class="notes">
+Each exposes functionality that can be tapped into.<br/>
 This is the goal of declarative programming, after all:<br/>
 specify the what, not the how.<br/>
 The point is to remind you to think beyond the immediate data<br/>
