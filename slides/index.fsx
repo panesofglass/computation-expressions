@@ -64,7 +64,7 @@ open FSharp.Control.Reactive.Builders
 
 ' Let's begin with a few examples built into the language.
 
-***
+---
 
 ### Seq<'T>
 *)
@@ -87,7 +87,7 @@ seq {
 ' but this serves as a useful example for the list-like
 ' syntax.
 
-***
+---
 
 ### Concatenating Seq<'T>
 *)
@@ -115,7 +115,7 @@ seq {
 ' used to compose the program which restrict what can
 ' be done.
 
-***
+---
 
 ### Async<'T>
 *)
@@ -186,6 +186,8 @@ async {
 
 ## One for the Dark Lord on his dark throne
 
+[![The One Ring](images/one-ring.jpg)](http://stock-wallpapers.com/wp-content/uploads/2015/01/Lord-of-the-Rings-Wallpapers-Free-Download-9.jpg)
+
 ' We'll come back to this one in just a bit. The motivating
 ' factor for many when first encroaching into computation
 ' expressions is to replicate what is found in Haskell or some
@@ -196,6 +198,8 @@ async {
 ***
 
 ## Nine for Mortal Men doomed to die
+
+[![Nine rings for mortal men](images/9rings.jpg)](http://www.itsvery.net/lord-of-the-rings.html)
 
 ' The Nine became the Nazgul, slaves to the Dark Lord Sauron.
 ' I found this to be true of me when first trying to understand
@@ -209,7 +213,7 @@ async {
 ' might help you reason about your code.
 ' Let's look at another example using `Option<'T>`.
 
-***
+---
 
 ### OptionBuilder
 *)
@@ -233,7 +237,7 @@ let opt = OptionMonad()
 ' documentation online.
 ' Unfortunately, this does not quite complete what's possible.
 
-***
+---
 
 ### OptionBuilder
 *)
@@ -257,7 +261,7 @@ let maybe = OptionBuilder()
 ' added members to help with combining computations return unit
 ' with continuing computations.
 
-***
+---
 
 ### Delayed Computations
 *)
@@ -282,7 +286,7 @@ maybe {
 ' and add them together if carryOn is true. Otherwise, we
 ' can return a None directly using ReturnFrom.
 
-***
+---
 
 ### Why should we care?
 
@@ -310,19 +314,30 @@ else None
 ' code such that it looks mostly like normal F# code while making side-
 ' effects explicit.
 
-***
+---
 
-### Back to the One Ring
+### Back to the One Ring ...
 
-* [FSharpPlus](https://github.com/gusty/FSharpPlus)
-* [FSharpx.Extras](https://github.com/fsprojects/FSharpx.Extras/tree/master/src/FSharpx.Extras/ComputationExpressions)
-* [Higher](https://github.com/palladin/Higher)
+[![Eye of Sauron](images/eye-of-sauron.jpg)](http://lotr.wikia.com/wiki/File:Worst-Does-all-of-this-prequel-Sauron-stuff-line-up-with-LOTR.jpg?file=Worst-Does-all-of-this-prequel-Sauron-stuff-line-up-with-LOTR.jpg)
+
+---
+
+[![Nazgul](images/nazgul.jpg)](http://pin.it/gwNsF5C)
 
 ' Much like the Nazgul, seduced by Sauron's power through the One Ring,
 ' you may get caught in the trap of trying to implement the one, true monad CE.
 ' Many computations can be written almost exactly alike, assuming they are
 ' monads. However, F# is not a purely functional, lazy language like Haskell,
 ' and the implementations cannot be implemented exactly alike.
+
+---
+
+### Monad (+more) libraries
+
+* [FSharpPlus](https://github.com/gusty/FSharpPlus)
+* [FSharpx.Extras](https://github.com/fsprojects/FSharpx.Extras/tree/master/src/FSharpx.Extras/ComputationExpressions)
+* [Higher](https://github.com/palladin/Higher)
+
 ' The One Ring, in this story, is the Haskell do-notation. FSharpPlus achieved
 ' do-notation, which is a single computation expression abstraced over any
 ' monadic type. The implementation is interesting and worth your time to
@@ -334,13 +349,15 @@ else None
 
 ## Seven for the Dwarf-lords in their halls of stone
 
+[![Dwarf lords](images/dwarf-lords.jpg)](https://heirsofdurin.files.wordpress.com/2013/10/dwarf-lords.jpg)
+
 ' Okay, let's move towards the light. Or at least a different kind of
 ' darkness. The rings of the dwarves don't factor into Tolkien's stories
 ' much, so I can't make a great analogy, but let's assume they were more
 ' powerful than the rings for men. In that case, I would relate them to
 ' the query expressions introduced in F# 3.0.
 
-***
+---
 
 ### QueryBuilder
 
@@ -365,7 +382,7 @@ query {
 ' computation expressions stagnated. However, some work still continued with
 ' interesting results.
 
-***
+---
 
 ### [FSharp.Control.Reactive](http://fsprojects.github.io/FSharp.Control.Reactive/)
 
@@ -391,7 +408,7 @@ rxquery {
 ' However, `zip` and `select` are not standard. They are not part of the core
 ' F# keywords. How do they appear within the language?
 
-***
+---
 
 ### RxQueryBuilder Select and Zip
 
@@ -423,7 +440,7 @@ type RxQueryBuilder with
 ' the two in one builder. It turns out, you can also extend an existing builder
 ' with new custom operations.
 
-***
+---
 
 ### Extending Existing Builders
 
@@ -451,7 +468,7 @@ type FSharp.Control.AsyncBuilder with
 ' within an async computation expression, now you know you can by extending the
 ' AsyncBuilder provided with FSharp.Core.
 
-***
+---
 
 ### Async Applicative Example
 
@@ -527,7 +544,7 @@ printfn "comp3 ran in %Oms with result %i" sw.ElapsedMilliseconds result3
 
 (**
 
-***
+---
 
 ### Caveat emptor
 *)
@@ -553,7 +570,7 @@ type FSharp.Control.AsyncBuilder with
 ' Unfortunately, that's not allowed with custom operations. That is
 ' to say, you can define the overload ...
 
-***
+---
 
 *)
 
@@ -572,7 +589,7 @@ async {
 
 ' But it will cause the custom operation to be unusable.
 
-***
+---
 
 ### Overloading workaround
 
@@ -608,7 +625,7 @@ Inference.infer "1"
 ' workaround should let you specify one of several types, typically
 ' including a wrapped value, in this case, an Async<int>.
 
-***
+---
 
 ### Overloading workaround (cont)
 
@@ -634,15 +651,19 @@ async {
 
 (**
 
-***
+---
 
 ### Other Limitations
 
-' TODO
+' You can find additional limitations, specifically with query builders
+' in the error codes defined in FSharp.Core:
+' https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSComp.txt#L1206
 
 ***
 
 ## Three Rings for the Elven-kings under the sky
+
+[![Elven kings](images/elven-rings.jpg)](http://www.itsvery.net/lord-of-the-rings.html)
 
 ' The rings of the elven kings were supposedly very powerful.
 ' We've seens some interesting building blocks. It's time to
@@ -654,7 +675,7 @@ async {
 ' expressions, though we must remember we have to work within
 ' certain constraints defined by the feature.
 
-***
+---
 
 ### Domain specific languages
 
@@ -674,7 +695,7 @@ Implementations of Common Intermediate Language (CIL):
 ' other room. So CEs can enable embedded domain specific
 ' languages but are not necessary for that purpose.
 
-***
+---
 
 ### Protocols
 
@@ -696,7 +717,7 @@ Implementations of Common Intermediate Language (CIL):
 ' TCP/IP, UDP, etc. are all protocols and define certain
 ' characterisitcs of behavior.
 
-***
+---
 
 ### Session Types
 
@@ -730,7 +751,7 @@ Implementations of Common Intermediate Language (CIL):
 ' as a computation expression and provide session types within
 ' F#.
 
-***
+---
 
 ### How?
 
@@ -746,7 +767,7 @@ Implementations of Common Intermediate Language (CIL):
 ' workflows. Query Expressions, too, hide a lot more than we
 ' saw earlier.
 
-***
+---
 
 ### Query Expressions Revisited
 
@@ -785,7 +806,7 @@ query {
 ' While the built-in query expression works just fine with
 ' Seq<'T>, it is clearly doing more under the covers.
 
-***
+---
 
 ### Freya's Graph
 
@@ -829,6 +850,17 @@ query {
 ' Computation expressions don't carry the full power of macros,
 ' but they cover the most important use cases to the point you won't
 ' likely miss macros.
+
+---
+
+### Research
+
+#### [MacroML](https://www.cs.indiana.edu/~sabry/papers/macroml.pdf)
+#### [MetaML](https://pdfs.semanticscholar.org/339f/4370bd02b977fc0d61fca50cc6a0ea26a24b.pdf)
+
+' Despite the challenges of implementing macros with statically typed
+' languages, several research efforts are making progress. Follow the
+' links to read more.
 
 ***
 
