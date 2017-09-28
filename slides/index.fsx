@@ -117,6 +117,25 @@ seq {
 
 ---
 
+### Concatenating Seq<'T>
+*)
+
+(*** define-output: seq-append ***)
+Seq.append xs ys
+
+(*** include-it: seq-concat ***)
+
+(**
+
+' Now, I know what you are thinking. Why all the fuss? I can do that
+' with Seq.append, too. It turns out that everything we see in this
+' talk could be written with modules of functions. Some people prefer
+' that style, and that's fine. However, as we move further along,
+' I think you'll see that CEs are a very good option for expressing
+' computations that modules of functions cannot.
+
+---
+
 ### Async<'T>
 *)
 
