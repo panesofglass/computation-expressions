@@ -106,7 +106,7 @@ seq {
 ' In addition to generating a sequence, we can also
 ' compose multiple sequences into a single sequence
 ' by concatenating them. This has the same effect as
-' calling `Seq.concat` on the two sequences. However,
+' calling `Seq.append` on the two sequences. However,
 ' the computation expression provides a useful way
 ' of defining the concatenation according to the rules
 ' behind each of the bindings. In the former example,
