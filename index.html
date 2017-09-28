@@ -153,6 +153,24 @@ be done.<br/>
 </aside>
 </section>
 <section >
+<h3>Concatenating Seq<'T></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Seq</span><span class="o">.</span><span class="i">append</span> <span class="i">xs</span> <span class="i">ys</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>Could not find reference 'seq-concat'</code></pre></td></tr></table>
+<aside class="notes">
+Now, I know what you are thinking. Why all the fuss? I can do that<br/>
+with Seq.append, too. It turns out that everything we see in this<br/>
+talk could be written with modules of functions. Some people prefer<br/>
+that style, and that's fine. However, as we move further along,<br/>
+I think you'll see that CEs are a very good option for expressing<br/>
+computations that modules of functions cannot.<br/>
+</aside>
+</section>
+<section >
 <h3>Async<'T></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
@@ -338,13 +356,11 @@ with continuing computations.<br/>
 <span class="l"> 8: </span>
 <span class="l"> 9: </span>
 <span class="l">10: </span>
-<span class="l">11: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">one</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span> }
 <span class="k">let</span> <span class="i">double</span> <span class="i">x</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="i">x</span> <span class="o">*</span> <span class="n">2</span> }
-<span class="k">let</span> <span class="i">carryOn</span> <span class="o">=</span> <span class="c">(*true*)</span> <span class="k">false</span>
 <span class="i">maybe</span> {
-    <span class="k">if</span> <span class="i">carryOn</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
         <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
         <span class="k">let!</span> <span class="i">x</span> <span class="o">=</span> <span class="i">one</span>
         <span class="k">let!</span> <span class="i">y</span> <span class="o">=</span> <span class="i">double</span> <span class="i">x</span>
@@ -359,6 +375,56 @@ with continuing computations.<br/>
 Here we see that we can retrieve the values of one and two<br/>
 and add them together if carryOn is true. Otherwise, we<br/>
 can return a None directly using ReturnFrom.<br/>
+However, the important thing to notice is that the printfn<br/>
+did not execute. The computation is only following the path<br/>
+selected in the if branch. The Delay is wrapped around the<br/>
+computation and keeps that branch of the computation from<br/>
+being evaluated.<br/>
+</aside>
+</section>
+<section >
+<h3>Delayed Computations (cont)</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">maybe</span> {
+    <span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
+        <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
+        <span class="k">let!</span> <span class="i">x</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span> }
+        <span class="k">let!</span> <span class="i">y</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="i">x</span> <span class="o">*</span> <span class="n">2</span> }
+        <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span>
+    <span class="k">else</span> <span class="k">return!</span> <span class="i">None</span>
+}
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>&lt;null&gt;</code></pre></td></tr></table>
+<aside class="notes">
+In this slightly modified example, you can see that the maybe<br/>
+computations embedded within the outer computation are never<br/>
+executed at all. This may be useful with computations that are<br/>
+expensive.<br/>
+</aside>
+</section>
+<section >
+<h3>Function Wrapper Types</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">Maybe</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">T</span><span class="o">&gt;</span> <span class="o">=</span> <span class="i">Maybe</span> <span class="k">of</span> (<span class="i">unit</span> <span class="k">-&gt;</span> <span class="o">&#39;</span><span class="i">T</span> <span class="i">option</span>)
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+Of course, you can also just create a wrapper type that delays<br/>
+execution of the computation by wrapping a function. The result<br/>
+then must be unwrapped and called, or the Run member could do<br/>
+the work as above.<br/>
 </aside>
 </section>
 <section >
@@ -373,7 +439,7 @@ can return a None directly using ReturnFrom.<br/>
 <span class="l">8: </span>
 <span class="l">9: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">if</span> <span class="i">carryOn</span> <span class="k">then</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
     <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
     <span class="k">match</span> <span class="i">one</span> <span class="k">with</span>
     | <span class="i">Some</span> <span class="i">x</span> <span class="k">-&gt;</span>
@@ -830,7 +896,75 @@ protocol. Both are protocols for networked communications.<br/>
 In the case of HTTP, the server behavior is what's really<br/>
 encoded. Clients may behave in almost any way they please.<br/>
 TCP/IP, UDP, etc. are all protocols and define certain<br/>
-characterisitcs of behavior.<br/>
+characterisitcs of behavoior.<br/>
+</aside>
+</section>
+<section >
+<h3>HTTP Protocol</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">GET</span> <span class="i">http</span><span class="o">:</span><span class="c">//openfsharp.org/ HTTP/1.1</span>
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+HTTP is a simple client/server, request response protocol<br/>
+that really only defines the behavior of the server. The<br/>
+client contract is pretty simple and very flexible, and most<br/>
+servers do their best to accommodate even barely correct<br/>
+requests. The above is the minimum a client needs to send to<br/>
+receive a response, and many servers will respond even without<br/>
+the HTTP version.<br/>
+</aside>
+</section>
+<section >
+<h3>Hypermedia</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="s">&quot;actions&quot;</span><span class="o">:</span> [
+  {
+    <span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;update-customer&quot;</span>,
+    <span class="s">&quot;title&quot;</span><span class="o">:</span><span class="s">&quot;Update Customer&quot;</span>,
+    <span class="s">&quot;method&quot;</span><span class="o">:</span><span class="s">&quot;POST&quot;</span>,
+    <span class="s">&quot;href&quot;</span><span class="o">:</span><span class="s">&quot;http://example.org/customers/123&quot;</span>,
+    <span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;application/x-www-form-urlencoded&quot;</span>,
+    <span class="s">&quot;fields&quot;</span><span class="o">:</span> [
+      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;status&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;hidden&quot;</span>,<span class="s">&quot;value&quot;</span><span class="o">:</span><span class="s">&quot;partial&quot;</span>},
+      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;return&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;hidden&quot;</span>,<span class="s">&quot;value&quot;</span><span class="o">:</span><span class="s">&quot;full&quot;</span>},
+      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;email&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;text&quot;</span> },
+      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;sms&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;number&quot;</span> }
+    ]
+  }
+]
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+The "hypertext" of HTTP implies that more can happen within<br/>
+a series of HTTP requests, and the "more" is defined by the<br/>
+media types transmitted between client and server. These can<br/>
+relate application state in the form of hypermedia controls.<br/>
+The above example is a [Siren](https://github.com/kevinswiber/siren)<br/>
+media type relaying the next actions the client may take in<br/>
+the current hypermedia session. (Taken from<br/>
+[Mike Amundsen's blog](http://amundsen.com/blog/archives/1149)).<br/>
+Hypermedia has been much more difficult to encode, and though<br/>
+many have tried, Freya still doesn't have any hypermedia plugins<br/>
+available.<br/>
 </aside>
 </section>
 <section >
@@ -870,18 +1004,20 @@ characterisitcs of behavior.<br/>
 <aside class="notes">
 This leads us to Session Types.<br/>
 Who has heard of session types?<br/>
-Session types are under active research. The idea is to provide a<br/>
-flexible type checking mechanism around protocols covering multiple<br/>
-parties. HTTP is an application protocol but only stipulates server<br/>
-behavior. Session types aim to cover multiple clients, including actors.<br/>
+Session types are under active research and aim to provide a<br/>
+flexible type checking mechanism around protocols.<br/>
+The target protocols cover single and multiple parties.<br/>
+Hypermedia is one example of a protocol that could be encoded with<br/>
+session types. Bank transactions, coffee orders, etc. could, as well.<br/>
+Session types are even being used to define actor protocols in Erlang.<br/>
 Consider how Type Providers made accessing data sources almost trivial<br/>
 (at least once you had the type provider). Session types could<br/>
 provide type safety on various types of workflows across multiple<br/>
 agents.<br/>
 This is an example of Scribble, a language for defining protocols<br/>
-for use with session types. I think we could encode Scribble<br/>
-as a computation expression and provide session types within<br/>
-F#.<br/>
+for use with session types. Based on Scribble, I think we could encode<br/>
+something within computation expressions and provide session types<br/>
+within F#. However, that work has only barely begun.<br/>
 </aside>
 </section>
 <section >
