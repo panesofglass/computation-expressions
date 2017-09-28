@@ -345,6 +345,61 @@ with continuing computations.<br/>
 </aside>
 </section>
 <section >
+<h3>Expansion</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span> }
+
+<span class="i">maybe</span><span class="o">.</span><span class="i">Run</span>(
+    <span class="i">maybe</span><span class="o">.</span><span class="i">Delay</span>(<span class="k">fun</span> () <span class="k">-&gt;</span>
+        <span class="i">maybe</span><span class="o">.</span><span class="i">Return</span> <span class="n">1</span>))
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+The F# compiler expands the computation into calls to the builder's methods.<br/>
+Here, you can see the expansion for a simple return. Because we implemented<br/>
+Run and Delay, they wrap the computation.<br/>
+</aside>
+</section>
+<section >
+<h3>Expansion</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">maybe</span> {
+    <span class="k">let!</span> <span class="i">value</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span>}
+    <span class="k">return</span> <span class="i">value</span>
+}
+
+<span class="i">maybe</span><span class="o">.</span><span class="i">Run</span>(
+    <span class="i">maybe</span><span class="o">.</span><span class="i">Delay</span>(<span class="k">fun</span> () <span class="k">-&gt;</span>
+        <span class="i">maybe</span><span class="o">.</span><span class="i">Bind</span>(<span class="i">maybe</span><span class="o">.</span><span class="i">Return</span> <span class="n">1</span>, <span class="k">fun</span> <span class="i">value</span> <span class="k">-&gt;</span>
+            <span class="i">maybe</span><span class="o">.</span><span class="i">Return</span> <span class="i">value</span>)))
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+Here's a more involved expansion for a bind and return.<br/>
+Just like LINQ's Select, SelectMany, etc., you can write this yourself,<br/>
+but you probably don't want to do that. However, it can be important<br/>
+to know what you are allocating in some performance sensitive areas.<br/>
+For example, you may want to write `maybe.Return 1` rather than<br/>
+`maybe { return 1 }`.<br/>
+</aside>
+</section>
+<section >
 <h3>Delayed Computations</h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
 <span class="l"> 2: </span>
