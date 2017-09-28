@@ -282,6 +282,49 @@ let maybe = OptionBuilder()
 
 ---
 
+### Expansion
+
+*)
+
+maybe { return 1 }
+
+maybe.Run(
+    maybe.Delay(fun () ->
+        maybe.Return 1))
+
+(**
+
+' The F# compiler expands the computation into calls to the builder's methods.
+' Here, you can see the expansion for a simple return. Because we implemented
+' Run and Delay, they wrap the computation.
+
+---
+
+### Expansion
+
+*)
+
+maybe {
+    let! value = maybe { return 1}
+    return value
+}
+
+maybe.Run(
+    maybe.Delay(fun () ->
+        maybe.Bind(maybe.Return 1, fun value ->
+            maybe.Return value)))
+
+(**
+
+' Here's a more involved expansion for a bind and return.
+' Just like LINQ's Select, SelectMany, etc., you can write this yourself,
+' but you probably don't want to do that. However, it can be important
+' to know what you are allocating in some performance sensitive areas.
+' For example, you may want to write `maybe.Return 1` rather than
+' `maybe { return 1 }`.
+
+---
+
 ### Delayed Computations
 *)
 
