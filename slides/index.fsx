@@ -285,25 +285,70 @@ let maybe = OptionBuilder()
 ### Delayed Computations
 *)
 
-(*** define-output: option-builder ***)
+(*** define-output:option-builder ***)
 let one = maybe { return 1 }
 let double x = maybe { return x * 2 }
-let carryOn = (*true*) false
 maybe {
-    if carryOn then
+    if false then
         printfn "proceeding"
         let! x = one
         let! y = double x
         return x + y
     else return! None
 }
-(*** include-it: option-builder ***)
+
+(*** include-it:option-builder ***)
 
 (**
 
 ' Here we see that we can retrieve the values of one and two
 ' and add them together if carryOn is true. Otherwise, we
 ' can return a None directly using ReturnFrom.
+' However, the important thing to notice is that the printfn
+' did not execute. The computation is only following the path
+' selected in the if branch. The Delay is wrapped around the
+' computation and keeps that branch of the computation from
+' being evaluated.
+
+---
+
+### Delayed Computations (cont)
+
+*)
+
+(*** define-output:option-builder-2 ***)
+maybe {
+    if false then
+        printfn "proceeding"
+        let! x = maybe { return 1 }
+        let! y = maybe { return x * 2 }
+        return x + y
+    else return! None
+}
+
+(*** include-it:option-builder-2 ***)
+
+(**
+
+' In this slightly modified example, you can see that the maybe
+' computations embedded within the outer computation are never
+' executed at all. This may be useful with computations that are
+' expensive.
+
+---
+
+### Function Wrapper Types
+
+*)
+
+type Maybe<'T> = Maybe of (unit -> 'T option)
+
+(**
+
+' Of course, you can also just create a wrapper type that delays
+' execution of the computation by wrapping a function. The result
+' then must be unwrapped and called, or the Run member could do
+' the work as above.
 
 ---
 
@@ -311,7 +356,7 @@ maybe {
 
 *)
 
-if carryOn then
+if false then
     printfn "proceeding"
     match one with
     | Some x ->
@@ -734,7 +779,53 @@ Implementations of Common Intermediate Language (CIL):
 ' In the case of HTTP, the server behavior is what's really
 ' encoded. Clients may behave in almost any way they please.
 ' TCP/IP, UDP, etc. are all protocols and define certain
-' characterisitcs of behavior.
+' characterisitcs of behavoior.
+
+---
+
+### HTTP Protocol
+
+    GET http://openfsharp.org/ HTTP/1.1
+
+' HTTP is a simple client/server, request response protocol
+' that really only defines the behavior of the server. The
+' client contract is pretty simple and very flexible, and most
+' servers do their best to accommodate even barely correct
+' requests. The above is the minimum a client needs to send to
+' receive a response, and many servers will respond even without
+' the HTTP version.
+
+---
+
+### Hypermedia
+
+    "actions": [
+      {
+        "name":"update-customer",
+        "title":"Update Customer",
+        "method":"POST",
+        "href":"http://example.org/customers/123",
+        "type":"application/x-www-form-urlencoded",
+        "fields": [
+          {"name":"status","type":"hidden","value":"partial"},
+          {"name":"return","type":"hidden","value":"full"},
+          {"name":"email","type":"text" },
+          {"name":"sms","type":"number" }
+        ]
+      }
+    ]
+
+' The "hypertext" of HTTP implies that more can happen within
+' a series of HTTP requests, and the "more" is defined by the
+' media types transmitted between client and server. These can
+' relate application state in the form of hypermedia controls.
+' The above example is a [Siren](https://github.com/kevinswiber/siren)
+' media type relaying the next actions the client may take in
+' the current hypermedia session. (Taken from
+' [Mike Amundsen's blog](http://amundsen.com/blog/archives/1149)).
+' Hypermedia has been much more difficult to encode, and though
+' many have tried, Freya still doesn't have any hypermedia plugins
+' available.
 
 ---
 
@@ -757,18 +848,20 @@ Implementations of Common Intermediate Language (CIL):
 
 ' This leads us to Session Types.
 ' Who has heard of session types?
-' Session types are under active research. The idea is to provide a
-' flexible type checking mechanism around protocols covering multiple
-' parties. HTTP is an application protocol but only stipulates server
-' behavior. Session types aim to cover multiple clients, including actors.
+' Session types are under active research and aim to provide a
+' flexible type checking mechanism around protocols.
+' The target protocols cover single and multiple parties.
+' Hypermedia is one example of a protocol that could be encoded with
+' session types. Bank transactions, coffee orders, etc. could, as well.
+' Session types are even being used to define actor protocols in Erlang.
 ' Consider how Type Providers made accessing data sources almost trivial
 ' (at least once you had the type provider). Session types could
 ' provide type safety on various types of workflows across multiple
 ' agents.
 ' This is an example of Scribble, a language for defining protocols
-' for use with session types. I think we could encode Scribble
-' as a computation expression and provide session types within
-' F#.
+' for use with session types. Based on Scribble, I think we could encode
+' something within computation expressions and provide session types
+' within F#. However, that work has only barely begun.
 
 ---
 
