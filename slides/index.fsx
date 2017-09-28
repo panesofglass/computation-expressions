@@ -822,14 +822,14 @@ query {
 
 ---
 
-![Freya's core components](images/freya/components.core.png)
+<img alt="Freya's core components" src="images/freya/components.core.png" width="40%" />
 
 ' Freya hides a graph of components that are used to run the
 ' application once configured.
 
 ---
 
-![Freya's responses](images/freya/specifications.responses.png)
+<img alt="Freya's responses" src="images/freya/specifications.responses.png" width="60%" />
 
 ' The graph is composed of smaller graphs.
 
