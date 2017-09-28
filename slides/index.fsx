@@ -553,6 +553,11 @@ type RxQueryBuilder with
 
 *)
 
+(*** hide ***)
+open System
+open System.Threading.Tasks
+
+(*** show ***)
 type FSharp.Control.AsyncBuilder with
 
     [<CustomOperation("and!", IsLikeZip=true)>]
@@ -590,7 +595,6 @@ type FSharp.Control.AsyncBuilder with
 *)
 
 (*** hide ***)
-
 let a (sw:Diagnostics.Stopwatch) = async {
     printfn "starting a %O" sw.ElapsedMilliseconds
     do! Async.Sleep 1000
