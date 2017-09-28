@@ -47,7 +47,7 @@ open FSharp.Control.Reactive.Builders
 ' to cover the academic aspects, which you can find in other
 ' talks and papers.
 ' I want to convey the power of computation expressions as they
-' related to solving problems. What sorts of problems? I hope
+' relate to solving problems. What sorts of problems? I hope
 ' to show computation expressions are useful for solving many
 ' different types of problems, as many as may be solved by
 ' writing computer programs.
