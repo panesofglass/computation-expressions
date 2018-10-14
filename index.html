@@ -194,12 +194,7 @@ computations that modules of functions cannot.<br/>
 </code></pre></td>
 </tr>
 </table>
-<table class="pre"><tr><td><pre><code>(OK,
- "&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-	&lt;meta charset="UTF-8"&gt;
-	&lt;title&gt;Open F#&lt;/title&gt;")</code></pre></td></tr></table>
+<table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
 <aside class="notes">
 Now let's look at an example using Async Workflows.<br/>
 It's almost 10 years ago today that [Don Syme](https://twitter.com/dsyme) posted<br/>
@@ -283,22 +278,64 @@ Let's look at another example using `Option<'T>`.<br/>
 </aside>
 </section>
 <section >
+<h2><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">Computation Expressions</a></h2>
+</section>
+<section >
+<h3>Why should we care?</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">one</span> <span class="o">=</span> <span class="i">Some</span> <span class="n">1</span>
+
+<span class="k">let</span> <span class="i">tryDivide</span> <span class="i">num</span> <span class="i">den</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="i">den</span> <span class="k">with</span>
+    | <span class="n">0</span> <span class="k">-&gt;</span> <span class="i">None</span>
+    | <span class="i">n</span> <span class="k">-&gt;</span> <span class="i">Some</span>(<span class="i">num</span> <span class="o">/</span> <span class="i">n</span>)
+
+<span class="k">match</span> <span class="i">one</span> <span class="k">with</span>
+| <span class="i">Some</span> <span class="i">x</span> <span class="k">-&gt;</span>
+    <span class="k">match</span> <span class="i">tryDivide</span> <span class="i">x</span> <span class="n">0</span> <span class="k">with</span>
+    | <span class="i">Some</span> <span class="i">y</span> <span class="k">-&gt;</span> <span class="i">Some</span>(<span class="i">x</span> <span class="o">+</span> <span class="i">y</span>)
+    | <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">None</span>
+| <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">None</span>
+</code></pre></td>
+</tr>
+</table>
+<aside class="notes">
+The above could be written like this, with nested match expressions.<br/>
+The computation expression clearly wins out in terms of succinctness.<br/>
+We also don't have to thread all the `None -> None` cases. This may<br/>
+not seems like such a big deal until you get into a situation where<br/>
+you have to cascade many option values in a long arrowhead pattern,<br/>
+e.g. if you are doing some parsing.<br/>
+In other words, computation expressions allow us to streamline our<br/>
+code such that it looks mostly like normal F# code while making side-<br/>
+effects explicit.<br/>
+</aside>
+</section>
+<section >
 <h3>OptionBuilder</h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">OptionMonad</span>() <span class="o">=</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Bind</span>(<span class="i">m</span>, <span class="i">f</span>) <span class="o">=</span> <span class="i">Option</span><span class="o">.</span><span class="i">bind</span> <span class="i">f</span> <span class="i">m</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Return</span>(<span class="i">x</span>) <span class="o">=</span> <span class="i">Some</span> <span class="i">x</span>
-
-<span class="k">let</span> <span class="i">opt</span> <span class="o">=</span> <span class="i">OptionMonad</span>()
 </code></pre></td>
 </tr>
 </table>
-<p><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">Computation Expressions</a></p>
 <aside class="notes">
 This is the basic definition of a monad written as a<br/>
 computation expression. The computation expression is<br/>
@@ -322,13 +359,15 @@ Unfortunately, this does not quite complete what's possible.<br/>
 <span class="l"> 8: </span>
 <span class="l"> 9: </span>
 <span class="l">10: </span>
+<span class="l">11: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">OptionBuilder</span>() <span class="o">=</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Bind</span>(<span class="i">m</span>, <span class="i">f</span>) <span class="o">=</span> <span class="i">Option</span><span class="o">.</span><span class="i">bind</span> <span class="i">f</span> <span class="i">m</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Return</span>(<span class="i">x</span>) <span class="o">=</span> <span class="i">Some</span> <span class="i">x</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">ReturnFrom</span>(<span class="i">m</span><span class="o">:</span> <span class="o">&#39;</span><span class="i">T</span> <span class="i">option</span>) <span class="o">=</span> <span class="i">m</span>
-    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Zero</span>() <span class="o">=</span> <span class="i">Some</span> ()
-    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Combine</span>(<span class="i">m</span>, <span class="i">f</span><span class="o">:</span> <span class="i">unit</span> <span class="k">-&gt;</span> _) <span class="o">=</span> <span class="i">Option</span><span class="o">.</span><span class="i">bind</span> <span class="i">f</span> <span class="i">m</span>
+    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Zero</span>() <span class="o">=</span> <span class="i">None</span>
+    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Combine</span>(<span class="i">m</span>, <span class="i">f</span><span class="o">:</span> <span class="i">unit</span> <span class="k">-&gt;</span> _) <span class="o">=</span>
+        <span class="k">match</span> <span class="i">m</span> <span class="k">with</span> <span class="i">Some</span> _ <span class="k">-&gt;</span> <span class="i">m</span> | <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">f</span>()
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Delay</span>(<span class="i">f</span><span class="o">:</span> <span class="i">unit</span> <span class="k">-&gt;</span> <span class="o">&#39;</span><span class="i">T</span>) <span class="o">=</span> <span class="i">f</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Run</span>(<span class="i">f</span>) <span class="o">=</span> <span class="i">f</span>()
 
@@ -401,31 +440,28 @@ For example, you may want to write `maybe.Return 1` rather than<br/>
 </section>
 <section >
 <h3>Delayed Computations</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
-<span class="l"> 2: </span>
-<span class="l"> 3: </span>
-<span class="l"> 4: </span>
-<span class="l"> 5: </span>
-<span class="l"> 6: </span>
-<span class="l"> 7: </span>
-<span class="l"> 8: </span>
-<span class="l"> 9: </span>
-<span class="l">10: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">one</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span> }
-<span class="k">let</span> <span class="i">double</span> <span class="i">x</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="i">x</span> <span class="o">*</span> <span class="n">2</span> }
-<span class="i">maybe</span> {
-    <span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
-        <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
-        <span class="k">let!</span> <span class="i">x</span> <span class="o">=</span> <span class="i">one</span>
-        <span class="k">let!</span> <span class="i">y</span> <span class="o">=</span> <span class="i">double</span> <span class="i">x</span>
-        <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span>
-    <span class="k">else</span> <span class="k">return!</span> <span class="i">None</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">opt</span> {
+    <span class="k">return</span> <span class="n">1</span>
+    <span class="i">printfn</span> <span class="s">&quot;delayed should not print&quot;</span>
+    <span class="k">return</span> <span class="n">2</span>
 }
 </code></pre></td>
 </tr>
 </table>
-<table class="pre"><tr><td><pre><code>&lt;null&gt;</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">delayed</span> <span class="i">should</span> <span class="i">not</span> <span class="i">print</span>
+<span class="k">val</span> <span class="i">it</span> <span class="o">:</span> <span class="i">int</span> <span class="i">option</span> <span class="o">=</span> <span class="i">Some</span> <span class="n">1</span>
+</code></pre></td>
+</tr>
+</table>
 <aside class="notes">
 Here we see that we can retrieve the values of one and two<br/>
 and add them together if carryOn is true. Otherwise, we<br/>
@@ -444,22 +480,16 @@ being evaluated.<br/>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
-<span class="l">8: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">maybe</span> {
-    <span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
-        <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
-        <span class="k">let!</span> <span class="i">x</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="n">1</span> }
-        <span class="k">let!</span> <span class="i">y</span> <span class="o">=</span> <span class="i">maybe</span> { <span class="k">return</span> <span class="i">x</span> <span class="o">*</span> <span class="n">2</span> }
-        <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span>
-    <span class="k">else</span> <span class="k">return!</span> <span class="i">None</span>
+    <span class="k">return</span> <span class="n">1</span>
+    <span class="i">printfn</span> <span class="s">&quot;delayed should not print&quot;</span>
+    <span class="k">return</span> <span class="n">2</span>
 }
 </code></pre></td>
 </tr>
 </table>
-<table class="pre"><tr><td><pre><code>&lt;null&gt;</code></pre></td></tr></table>
+<table class="pre"><tr><td><pre><code>Some 1</code></pre></td></tr></table>
 <aside class="notes">
 In this slightly modified example, you can see that the maybe<br/>
 computations embedded within the outer computation are never<br/>
@@ -480,42 +510,6 @@ Of course, you can also just create a wrapper type that delays<br/>
 execution of the computation by wrapping a function. The result<br/>
 then must be unwrapped and called, or the Run member could do<br/>
 the work as above.<br/>
-</aside>
-</section>
-<section >
-<h3>Why should we care?</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
-<span class="l">8: </span>
-<span class="l">9: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">if</span> <span class="k">false</span> <span class="k">then</span>
-    <span class="i">printfn</span> <span class="s">&quot;proceeding&quot;</span>
-    <span class="k">match</span> <span class="i">one</span> <span class="k">with</span>
-    | <span class="i">Some</span> <span class="i">x</span> <span class="k">-&gt;</span>
-        <span class="k">match</span> <span class="i">double</span> <span class="i">x</span> <span class="k">with</span>
-        | <span class="i">Some</span> <span class="i">y</span> <span class="k">-&gt;</span> <span class="i">Some</span>(<span class="i">x</span> <span class="o">+</span> <span class="i">y</span>)
-        | <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">None</span>
-    | <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">None</span>
-<span class="k">else</span> <span class="i">None</span>
-</code></pre></td>
-</tr>
-</table>
-<aside class="notes">
-The above could be written like this, with nested match expressions.<br/>
-The computation expression clearly wins out in terms of succinctness.<br/>
-We also don't have to thread all the `None -> None` cases. This may<br/>
-not seems like such a big deal until you get into a situation where<br/>
-you have to cascade many option values in a long arrowhead pattern,<br/>
-e.g. if you are doing some parsing.<br/>
-In other words, computation expressions allow us to streamline our<br/>
-code such that it looks mostly like normal F# code while making side-<br/>
-effects explicit.<br/>
 </aside>
 </section>
 <section >
@@ -560,6 +554,9 @@ much, so I can't make a great analogy, but let's assume they were more<br/>
 powerful than the rings for men. In that case, I would relate them to<br/>
 the query expressions introduced in F# 3.0.<br/>
 </aside>
+</section>
+<section >
+<h2><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions">Query Expressions</a></h2>
 </section>
 <section >
 <h3>QueryBuilder</h3>
@@ -676,8 +673,6 @@ with new custom operations.<br/>
 <span class="l">11: </span>
 <span class="l">12: </span>
 <span class="l">13: </span>
-<span class="l">14: </span>
-<span class="l">15: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">FSharp</span><span class="o">.</span><span class="i">Control</span><span class="o">.</span><span class="i">AsyncBuilder</span> <span class="k">with</span>
 
@@ -685,12 +680,10 @@ with new custom operations.<br/>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Merge</span>(<span class="i">x</span>, <span class="i">y</span>,
                     [&lt;<span class="i">ProjectionParameter</span>&gt;] <span class="i">resultSelector</span> <span class="o">:</span> _ <span class="k">-&gt;</span> _) <span class="o">=</span>
         <span class="i">async</span> {
-            <span class="k">let!</span> <span class="i">x&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">StartChildAsTask</span> <span class="i">x</span>
-            <span class="k">let!</span> <span class="i">y&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">StartChildAsTask</span> <span class="i">y</span>
+            <span class="k">let</span> <span class="i">x&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">StartAsTask</span> <span class="i">x</span>
+            <span class="k">let</span> <span class="i">y&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">StartAsTask</span> <span class="i">y</span>
             <span class="k">do</span> <span class="i">Task</span><span class="o">.</span><span class="i">WaitAll</span>(<span class="i">x&#39;</span>,<span class="i">y&#39;</span>)
-            <span class="k">let!</span> <span class="i">x&#39;&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">AwaitTask</span> <span class="i">x&#39;</span>
-            <span class="k">let!</span> <span class="i">y&#39;&#39;</span> <span class="o">=</span> <span class="i">Async</span><span class="o">.</span><span class="i">AwaitTask</span> <span class="i">y&#39;</span>
-            <span class="k">return</span> <span class="i">resultSelector</span> <span class="i">x&#39;&#39;</span> <span class="i">y&#39;&#39;</span>
+            <span class="k">return</span> <span class="i">resultSelector</span> <span class="i">x&#39;</span><span class="o">.</span><span class="i">Result</span> <span class="i">y&#39;</span><span class="o">.</span><span class="i">Result</span>
         }
 
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">For</span>(<span class="i">m</span>, <span class="i">f</span>) <span class="o">=</span> <span class="i">__</span><span class="o">.</span><span class="i">Bind</span>(<span class="i">m</span>, <span class="i">f</span>)
@@ -704,7 +697,7 @@ AsyncBuilder provided with FSharp.Core.<br/>
 </aside>
 </section>
 <section >
-<h3>Async Applicative Example</h3>
+<h3>Parallel Async Example</h3>
 <aside class="notes">
 Jump to VSCode to run this in FSI, as the code snippet is too long.<br/>
 The code compares awaiting two sleeps and shows that the applicative,<br/>
@@ -716,7 +709,191 @@ in the VisualFSharp issues: https://github.com/fsharp/fslang-suggestions/issues/
 </aside>
 </section>
 <section >
-<h3>Caveat emptor</h3>
+<h3>Async with 1000ms Sleep</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">a</span> (<span class="i">sw</span><span class="o">:</span><span class="i">Diagnostics</span><span class="o">.</span><span class="i">Stopwatch</span>) <span class="o">=</span> <span class="i">async</span> {
+    <span class="i">printfn</span> <span class="s">&quot;starting a %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">do!</span> <span class="i">Async</span><span class="o">.</span><span class="i">Sleep</span> <span class="n">1000</span>
+    <span class="i">printfn</span> <span class="s">&quot;returning a %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">return</span> <span class="n">1</span>
+}
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Async with 500ms Sleep</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">b</span> (<span class="i">sw</span><span class="o">:</span><span class="i">Diagnostics</span><span class="o">.</span><span class="i">Stopwatch</span>) <span class="o">=</span> <span class="i">async</span> {
+    <span class="i">printfn</span> <span class="s">&quot;starting b %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">do!</span> <span class="i">Async</span><span class="o">.</span><span class="i">Sleep</span> <span class="n">500</span>
+    <span class="k">do</span> <span class="i">printfn</span> <span class="s">&quot;returning b %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">return</span> <span class="n">2</span>
+}
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Sequential</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">compBind</span> <span class="i">sw</span> <span class="o">=</span> <span class="i">async</span> {
+    <span class="k">let!</span> <span class="i">x</span> <span class="o">=</span> <span class="i">a</span> <span class="i">sw</span>
+    <span class="k">let!</span> <span class="i">y</span> <span class="o">=</span> <span class="i">b</span> <span class="i">sw</span>
+    <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span>
+}
+<span class="k">let</span> <span class="i">sw</span> <span class="o">=</span> <span class="i">Diagnostics</span><span class="o">.</span><span class="i">Stopwatch</span><span class="o">.</span><span class="i">StartNew</span>()
+<span class="k">let</span> <span class="i">resultBind</span> <span class="o">=</span> <span class="i">compBind</span> <span class="i">sw</span> <span class="o">|&gt;</span> <span class="i">Async</span><span class="o">.</span><span class="i">RunSynchronously</span>
+<span class="i">sw</span><span class="o">.</span><span class="i">Stop</span>()
+<span class="i">printfn</span> <span class="s">&quot;compBind ran in %Oms with result %i&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span> <span class="i">resultBind</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">starting</span> <span class="i">a</span> <span class="n">7</span>
+<span class="i">returning</span> <span class="i">a</span> <span class="n">1010</span>
+<span class="i">starting</span> <span class="i">b</span> <span class="n">1016</span>
+<span class="i">returning</span> <span class="i">b</span> <span class="n">1518</span>
+<span class="i">compBind</span> <span class="i">ran</span> <span class="k">in</span> <span class="n">1521ms</span> <span class="k">with</span> <span class="i">result</span> <span class="n">3</span>
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Parallel</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">comp</span> <span class="i">sw</span> <span class="o">=</span> <span class="i">async</span> {
+    <span class="k">for</span> <span class="i">x</span> <span class="k">in</span> <span class="i">a</span> <span class="i">sw</span> <span class="k">do</span>
+    <span class="i">``and!``</span> <span class="i">y</span> <span class="k">in</span> <span class="i">b</span> <span class="i">sw</span>
+    <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span>
+}
+<span class="i">sw</span><span class="o">.</span><span class="i">Reset</span>()
+<span class="i">sw</span><span class="o">.</span><span class="i">Start</span>()
+<span class="k">let</span> <span class="i">result</span> <span class="o">=</span> <span class="i">comp</span> <span class="i">sw</span> <span class="o">|&gt;</span> <span class="i">Async</span><span class="o">.</span><span class="i">RunSynchronously</span>
+<span class="i">sw</span><span class="o">.</span><span class="i">Stop</span>()
+<span class="i">printfn</span> <span class="s">&quot;comp ran in %Oms with result %i&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span> <span class="i">result</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">starting</span> <span class="i">a</span> <span class="n">4</span>
+<span class="i">starting</span> <span class="i">b</span> <span class="n">4</span>
+<span class="i">returning</span> <span class="i">b</span> <span class="n">505</span>
+<span class="i">returning</span> <span class="i">a</span> <span class="n">1004</span>
+<span class="i">comp</span> <span class="i">ran</span> <span class="k">in</span> <span class="n">1005ms</span> <span class="k">with</span> <span class="i">result</span> <span class="n">3</span>
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Another Async with 1500ms Sleep</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">c</span> (<span class="i">sw</span><span class="o">:</span><span class="i">Diagnostics</span><span class="o">.</span><span class="i">Stopwatch</span>) <span class="o">=</span> <span class="i">async</span> {
+    <span class="i">printfn</span> <span class="s">&quot;starting c %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">do!</span> <span class="i">Async</span><span class="o">.</span><span class="i">Sleep</span> <span class="n">1500</span>
+    <span class="k">do</span> <span class="i">printfn</span> <span class="s">&quot;returning c %O&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span>
+    <span class="k">return</span> <span class="n">3</span>
+}
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>2+ Asyncs</h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">comp3</span> <span class="i">sw</span> <span class="o">=</span> <span class="i">async</span> {
+    <span class="k">for</span> <span class="i">x</span> <span class="k">in</span> <span class="i">a</span> <span class="i">sw</span> <span class="k">do</span>
+    <span class="i">``and!``</span> <span class="i">y</span> <span class="k">in</span> <span class="i">b</span> <span class="i">sw</span>
+    <span class="i">``and!``</span> <span class="i">z</span> <span class="k">in</span> <span class="i">c</span> <span class="i">sw</span>
+    <span class="k">return</span> <span class="i">x</span> <span class="o">+</span> <span class="i">y</span> <span class="o">+</span> <span class="i">z</span>
+}
+<span class="i">sw</span><span class="o">.</span><span class="i">Reset</span>()
+<span class="i">sw</span><span class="o">.</span><span class="i">Start</span>()
+<span class="k">let</span> <span class="i">result3</span> <span class="o">=</span> <span class="i">comp3</span> <span class="i">sw</span> <span class="o">|&gt;</span> <span class="i">Async</span><span class="o">.</span><span class="i">RunSynchronously</span>
+<span class="i">sw</span><span class="o">.</span><span class="i">Stop</span>()
+<span class="i">printfn</span> <span class="s">&quot;comp3 ran in %Oms with result %i&quot;</span> <span class="i">sw</span><span class="o">.</span><span class="i">ElapsedMilliseconds</span> <span class="i">result3</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">starting</span> <span class="i">a</span> <span class="i">starting</span> <span class="i">b</span> <span class="n">3</span>
+<span class="n">3</span>
+<span class="i">starting</span> <span class="i">c</span> <span class="n">4</span>
+<span class="i">returning</span> <span class="i">b</span> <span class="n">504</span>
+<span class="i">returning</span> <span class="i">a</span> <span class="n">1004</span>
+<span class="i">returning</span> <span class="i">c</span> <span class="n">1506</span>
+<span class="i">comp3</span> <span class="i">ran</span> <span class="k">in</span> <span class="n">1510ms</span> <span class="k">with</span> <span class="i">result</span> <span class="n">6</span>
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3><code>CustomOperation</code> Overloading</h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
 <span class="l"> 2: </span>
 <span class="l"> 3: </span>
@@ -731,7 +908,7 @@ in the VisualFSharp issues: https://github.com/fsharp/fslang-suggestions/issues/
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">FSharp</span><span class="o">.</span><span class="i">Control</span><span class="o">.</span><span class="i">AsyncBuilder</span> <span class="k">with</span>
 
-    [&lt;<span class="i">CustomOperation</span>(<span class="s">&quot;and!&quot;</span>, <span class="i">IsLikeZip</span><span class="o">=</span><span class="k">true</span>)&gt;]
+    <span class="c">//[&lt;CustomOperation(&quot;and!&quot;, IsLikeZip=true)&gt;]</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Merge</span>(<span class="i">x</span><span class="o">:</span> <span class="i">Task</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">a</span><span class="o">&gt;</span>, <span class="i">y</span><span class="o">:</span> <span class="i">Task</span><span class="o">&lt;</span><span class="o">&#39;</span><span class="i">b</span><span class="o">&gt;</span>,
                     [&lt;<span class="i">ProjectionParameter</span>&gt;] <span class="i">resultSelector</span> <span class="o">:</span> _ <span class="k">-&gt;</span> _) <span class="o">=</span>
         <span class="i">async</span> {
@@ -748,8 +925,16 @@ You may assume that method overloading is as easy as adding another,<br/>
 similar named method. After all, many people extend `AsyncBuilder`<br/>
 with implementations of `Bind` that deal with `Task<'T>` and `Task`<br/>
 so that they don't have to deal with the `Async.AwaitTask`.<br/>
-Unfortunately, that's not allowed with custom operations. That is<br/>
-to say, you can define the overload ...<br/>
+Interestingly, that's not allowed with custom operations if you:<br/>
+  1) attempt to add it directly to the builder class and/or<br/>
+  2) attempt to add the same attribute again with the same name.<br/>
+If you add an extension member outside the type definition and assign<br/>
+the name to a CustomOperation attribute on only one member, you _can_<br/>
+add overloads. This appears to work through the class method dispatch<br/>
+and is technically a bug, but it will allow you to overload custom<br/>
+operations until official support is released, which is currently a<br/>
+work in progress:<br/>
+https://github.com/fsharp/fslang-design/blob/master/RFCs/FS-1056-allow-custom-operation-overloads.md<br/>
 </aside>
 </section>
 <section >
@@ -778,90 +963,7 @@ But it will cause the custom operation to be unusable.<br/>
 </aside>
 </section>
 <section >
-<h3>Overloading workaround</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
-<span class="l"> 2: </span>
-<span class="l"> 3: </span>
-<span class="l"> 4: </span>
-<span class="l"> 5: </span>
-<span class="l"> 6: </span>
-<span class="l"> 7: </span>
-<span class="l"> 8: </span>
-<span class="l"> 9: </span>
-<span class="l">10: </span>
-<span class="l">11: </span>
-<span class="l">12: </span>
-<span class="l">13: </span>
-<span class="l">14: </span>
-<span class="l">15: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">module</span> <span class="i">Inference</span> <span class="o">=</span>
-    <span class="k">type</span> <span class="i">Defaults</span> <span class="o">=</span>
-        | <span class="i">Defaults</span>
-        <span class="k">static</span> <span class="k">member</span> <span class="i">Value</span> (<span class="i">x</span><span class="o">:</span> <span class="i">Async</span><span class="o">&lt;</span><span class="i">int</span><span class="o">&gt;</span>) <span class="o">=</span>
-            <span class="i">x</span>
-        <span class="k">static</span> <span class="k">member</span> <span class="k">inline</span> <span class="i">Value</span> (<span class="i">x</span><span class="o">:</span> <span class="i">int</span>) <span class="o">=</span>
-            <span class="i">async</span><span class="o">.</span><span class="i">Return</span> <span class="i">x</span>
-        <span class="k">static</span> <span class="k">member</span> <span class="k">inline</span> <span class="i">Value</span> (<span class="i">x</span><span class="o">:</span> <span class="i">string</span>) <span class="o">=</span>
-            <span class="i">int</span> <span class="i">x</span> <span class="o">|&gt;</span> <span class="i">async</span><span class="o">.</span><span class="i">Return</span>
-
-    <span class="k">let</span> <span class="k">inline</span> <span class="i">defaults</span> (<span class="i">a</span><span class="o">:</span> <span class="o">^</span><span class="i">a</span>, _<span class="o">:</span> <span class="o">^</span><span class="i">b</span>) <span class="o">=</span>
-        ((<span class="o">^</span><span class="i">a</span> <span class="k">or</span> <span class="o">^</span><span class="i">b</span>) <span class="o">:</span> (<span class="k">static</span> <span class="k">member</span> <span class="i">Value</span> <span class="o">:</span> <span class="o">^</span><span class="i">a</span> <span class="k">-&gt;</span> <span class="i">Async</span><span class="o">&lt;</span>_<span class="o">&gt;</span>) <span class="i">a</span>)
-    
-    <span class="k">let</span> <span class="k">inline</span> <span class="i">infer</span> (<span class="i">a</span><span class="o">:</span> <span class="o">&#39;</span><span class="i">a</span>) <span class="o">=</span>
-        <span class="i">defaults</span>(<span class="i">a</span>, <span class="i">Defaults</span>)
-</code></pre></td>
-</tr>
-</table>
-<aside class="notes">
-The Async Zip example is not really a good one. If you want to<br/>
-allow both Async and Task<'T> in the same workflow, you're going to<br/>
-have to ultimately pick one, and that usually means Task<'T>, which<br/>
-changes the semantics of F# Async computations considerably. The<br/>
-workaround should let you specify one of several types, typically<br/>
-including a wrapped value, in this case, an Async<int>.<br/>
-</aside>
-</section>
-<section >
-<h3>Overloading workaround (cont)</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
-<span class="l">8: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">FSharp</span><span class="o">.</span><span class="i">Control</span><span class="o">.</span><span class="i">AsyncBuilder</span> <span class="k">with</span>
-    [&lt;<span class="i">CustomOperation</span>(<span class="s">&quot;add&quot;</span>, <span class="i">MaintainsVariableSpaceUsingBind</span><span class="o">=</span><span class="k">true</span>)&gt;]
-    <span class="k">member</span> <span class="k">inline</span> <span class="i">__</span><span class="o">.</span><span class="i">Add</span>(<span class="i">m</span>, <span class="i">x</span>) <span class="o">=</span>
-        <span class="i">async</span> {
-            <span class="k">let!</span> <span class="i">a</span> <span class="o">=</span> <span class="i">m</span>
-            <span class="k">let!</span> <span class="i">b</span> <span class="o">=</span> <span class="i">Inference</span><span class="o">.</span><span class="i">infer</span> <span class="i">x</span>
-            <span class="k">return</span> <span class="i">a</span> <span class="o">+</span> <span class="i">b</span>
-        }
-</code></pre></td>
-</tr>
-</table>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">async</span> {
-    <span class="k">let!</span> <span class="i">m</span> <span class="o">=</span> <span class="i">async</span><span class="o">.</span><span class="i">Return</span> <span class="n">0</span>
-    <span class="i">add</span> <span class="s">&quot;1&quot;</span>
-    <span class="i">add</span> <span class="s">&quot;2&quot;</span>
-} <span class="o">|&gt;</span> <span class="i">Async</span><span class="o">.</span><span class="i">RunSynchronously</span>
-</code></pre></td>
-</tr>
-</table>
-<table class="pre"><tr><td><pre><code>3</code></pre></td></tr></table>
-</section>
-<section >
-<h3>Other Limitations</h3>
+<h3><a href="https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSComp.txt#L1206">Other Limitations</a></h3>
 <aside class="notes">
 You can find additional limitations, specifically with query builders<br/>
 in the error codes defined in FSharp.Core:<br/>
@@ -886,12 +988,62 @@ certain constraints defined by the feature.<br/>
 </aside>
 </section>
 <section >
-<h3>Domain specific languages</h3>
-<p>Implementations of Common Intermediate Language (CIL):</p>
-<ul>
-<li><a href="https://github.com/kbattocchi/ILBuilder">ILBuilder</a></li>
-<li><a href="https://github.com/rspeele/LicenseToCIL">LicenseToCIL</a></li>
-</ul>
+<h2>Domain Specific Languages</h2>
+</section>
+<section >
+<h3>Builds with <a href="https://github.com/FakeBuild/Xake">Xake</a></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="prep">#r</span> <span class="s">&quot;paket:</span>
+<span class="s">  nuget Xake ~&gt; 1.1 prerelease</span>
+<span class="s">  nuget Xake.Dotnet ~&gt; 1.1 prerelease //&quot;</span>
+
+<span class="k">open</span> <span class="i">Xake</span>
+<span class="k">open</span> <span class="i">Xake</span><span class="o">.</span><span class="i">Dotnet</span>
+
+<span class="k">do</span> <span class="i">xakeScript</span> {
+  <span class="i">rules</span> [
+    <span class="s">&quot;main&quot;</span> <span class="o">&lt;==</span> [<span class="s">&quot;helloworld.exe&quot;</span>]
+
+    <span class="s">&quot;helloworld.exe&quot;</span> <span class="o">.</span><span class="o">.&gt;</span> <span class="i">csc</span> {<span class="i">src</span> <span class="o">!!</span><span class="s">&quot;helloworld.cs&quot;</span>}
+  ]
+}
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Testing with <a href="https://github.com/haf/expecto">Expecto</a></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">tests</span> <span class="o">=</span>
+  <span class="i">test</span> <span class="s">&quot;A simple test&quot;</span> {
+    <span class="k">let</span> <span class="i">subject</span> <span class="o">=</span> <span class="s">&quot;Hello World&quot;</span>
+    <span class="i">Expect</span><span class="o">.</span><span class="i">equal</span> <span class="i">subject</span> <span class="s">&quot;Hello World&quot;</span> <span class="s">&quot;The strings should equal&quot;</span>
+  }
+</code></pre></td>
+</tr>
+</table>
+</section>
+<section >
+<h3>Emitting CIL with <a href="https://github.com/rspeele/LicenseToCIL">LicenseToCIL</a></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
@@ -920,8 +1072,7 @@ languages but are not necessary for that purpose.<br/>
 </aside>
 </section>
 <section >
-<h3>Protocols</h3>
-<p><a href="https://freya.io/">Freya</a> implements the HTTP state machine</p>
+<h3>HTTP Protocol with <a href="https://freya.io/">Freya</a></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
@@ -955,125 +1106,45 @@ characterisitcs of behavoior.<br/>
 </aside>
 </section>
 <section >
-<h3>HTTP Protocol</h3>
+<h3>MVC with <a href="https://saturnframework.org/">Saturn</a></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">GET</span> <span class="i">http</span><span class="o">:</span><span class="c">//openfsharp.org/ HTTP/1.1</span>
-</code></pre></td>
-</tr>
-</table>
-<aside class="notes">
-HTTP is a simple client/server, request response protocol<br/>
-that really only defines the behavior of the server. The<br/>
-client contract is pretty simple and very flexible, and most<br/>
-servers do their best to accommodate even barely correct<br/>
-requests. The above is the minimum a client needs to send to<br/>
-receive a response, and many servers will respond even without<br/>
-the HTTP version.<br/>
-</aside>
-</section>
-<section >
-<h3>Hypermedia</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
-<span class="l"> 2: </span>
-<span class="l"> 3: </span>
-<span class="l"> 4: </span>
-<span class="l"> 5: </span>
-<span class="l"> 6: </span>
-<span class="l"> 7: </span>
-<span class="l"> 8: </span>
-<span class="l"> 9: </span>
-<span class="l">10: </span>
-<span class="l">11: </span>
-<span class="l">12: </span>
-<span class="l">13: </span>
-<span class="l">14: </span>
-<span class="l">15: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="s">&quot;actions&quot;</span><span class="o">:</span> [
-  {
-    <span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;update-customer&quot;</span>,
-    <span class="s">&quot;title&quot;</span><span class="o">:</span><span class="s">&quot;Update Customer&quot;</span>,
-    <span class="s">&quot;method&quot;</span><span class="o">:</span><span class="s">&quot;POST&quot;</span>,
-    <span class="s">&quot;href&quot;</span><span class="o">:</span><span class="s">&quot;http://example.org/customers/123&quot;</span>,
-    <span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;application/x-www-form-urlencoded&quot;</span>,
-    <span class="s">&quot;fields&quot;</span><span class="o">:</span> [
-      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;status&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;hidden&quot;</span>,<span class="s">&quot;value&quot;</span><span class="o">:</span><span class="s">&quot;partial&quot;</span>},
-      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;return&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;hidden&quot;</span>,<span class="s">&quot;value&quot;</span><span class="o">:</span><span class="s">&quot;full&quot;</span>},
-      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;email&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;text&quot;</span> },
-      {<span class="s">&quot;name&quot;</span><span class="o">:</span><span class="s">&quot;sms&quot;</span>,<span class="s">&quot;type&quot;</span><span class="o">:</span><span class="s">&quot;number&quot;</span> }
-    ]
-  }
-]
-</code></pre></td>
-</tr>
-</table>
-<aside class="notes">
-The "hypertext" of HTTP implies that more can happen within<br/>
-a series of HTTP requests, and the "more" is defined by the<br/>
-media types transmitted between client and server. These can<br/>
-relate application state in the form of hypermedia controls.<br/>
-The above example is a [Siren](https://github.com/kevinswiber/siren)<br/>
-media type relaying the next actions the client may take in<br/>
-the current hypermedia session. (Taken from<br/>
-[Mike Amundsen's blog](http://amundsen.com/blog/archives/1149)).<br/>
-Hypermedia has been much more difficult to encode, and though<br/>
-many have tried, Freya still doesn't have any hypermedia plugins<br/>
-available.<br/>
-</aside>
-</section>
-<section >
-<h3>Session Types</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
-<span class="l"> 2: </span>
-<span class="l"> 3: </span>
-<span class="l"> 4: </span>
-<span class="l"> 5: </span>
-<span class="l"> 6: </span>
-<span class="l"> 7: </span>
-<span class="l"> 8: </span>
-<span class="l"> 9: </span>
-<span class="l">10: </span>
-<span class="l">11: </span>
-<span class="l">12: </span>
-<span class="l">13: </span>
-<span class="l">14: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">module</span> <span class="i">example</span>;
-
-<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Greetings&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Greetings.xsd&quot;</span> <span class="k">as</span> <span class="i">Greetings</span>;
-<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Compliments&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Compliments.xsd&quot;</span> <span class="k">as</span> <span class="i">Compliments</span>;
-<span class="k">type</span> <span class="o">&lt;</span><span class="i">xsd</span><span class="o">&gt;</span> <span class="s">&quot;{http://www.acme.com/types}Salutations&quot;</span> <span class="i">from</span> <span class="s">&quot;http://www.acme.com/types/Salutations.xsd&quot;</span> <span class="k">as</span> <span class="i">Salutations</span>;
-
-<span class="k">global</span> <span class="i">protocol</span> <span class="i">HelloWorld</span>(<span class="i">role</span> <span class="i">Me</span>, <span class="i">role</span> <span class="i">World</span>) {
-    <span class="i">hello</span>(<span class="i">Greetings</span>) <span class="i">from</span> <span class="i">Me</span> <span class="k">to</span> <span class="i">World</span>;
-    <span class="i">choice</span> <span class="i">at</span> <span class="i">World</span> {
-        <span class="i">goodMorning</span>(<span class="i">Compliments</span>) <span class="i">from</span> <span class="i">World</span> <span class="k">to</span> <span class="i">Me</span>;
-    } <span class="k">or</span> {
-        <span class="i">goodAfternoon</span>(<span class="i">Salutations</span>) <span class="i">from</span> <span class="i">World</span> <span class="k">to</span> <span class="i">Me</span>;
-    }
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">commentController</span> <span class="i">userId</span> <span class="o">=</span> <span class="i">controller</span> {
+    <span class="i">index</span> (<span class="k">fun</span> <span class="i">ctx</span> <span class="k">-&gt;</span> (<span class="i">sprintf</span> <span class="s">&quot;Comment Index handler for user %i&quot;</span> <span class="i">userId</span> ) <span class="o">|&gt;</span> <span class="i">Controller</span><span class="o">.</span><span class="i">text</span> <span class="i">ctx</span>)
+    <span class="i">add</span> (<span class="k">fun</span> <span class="i">ctx</span> <span class="k">-&gt;</span> (<span class="i">sprintf</span> <span class="s">&quot;Comment Add handler for user %i&quot;</span> <span class="i">userId</span> ) <span class="o">|&gt;</span> <span class="i">Controller</span><span class="o">.</span><span class="i">text</span> <span class="i">ctx</span>)
+    <span class="i">show</span> (<span class="k">fun</span> (<span class="i">ctx</span>, <span class="i">id</span>) <span class="k">-&gt;</span> (<span class="i">sprintf</span> <span class="s">&quot;Show comment %s handler for user %i&quot;</span> <span class="i">id</span> <span class="i">userId</span> ) <span class="o">|&gt;</span> <span class="i">Controller</span><span class="o">.</span><span class="i">text</span> <span class="i">ctx</span>)
+    <span class="i">edit</span> (<span class="k">fun</span> (<span class="i">ctx</span>, <span class="i">id</span>) <span class="k">-&gt;</span> (<span class="i">sprintf</span> <span class="s">&quot;Edit comment %s handler for user %i&quot;</span> <span class="i">id</span> <span class="i">userId</span> )  <span class="o">|&gt;</span> <span class="i">Controller</span><span class="o">.</span><span class="i">text</span> <span class="i">ctx</span>)
 }
 </code></pre></td>
 </tr>
 </table>
-<aside class="notes">
-This leads us to Session Types.<br/>
-Who has heard of session types?<br/>
-Session types are under active research and aim to provide a<br/>
-flexible type checking mechanism around protocols.<br/>
-The target protocols cover single and multiple parties.<br/>
-Hypermedia is one example of a protocol that could be encoded with<br/>
-session types. Bank transactions, coffee orders, etc. could, as well.<br/>
-Session types are even being used to define actor protocols in Erlang.<br/>
-Consider how Type Providers made accessing data sources almost trivial<br/>
-(at least once you had the type provider). Session types could<br/>
-provide type safety on various types of workflows across multiple<br/>
-agents.<br/>
-This is an example of Scribble, a language for defining protocols<br/>
-for use with session types. Based on Scribble, I think we could encode<br/>
-something within computation expressions and provide session types<br/>
-within F#. However, that work has only barely begun.<br/>
-</aside>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">app</span> <span class="o">=</span> <span class="i">application</span> {
+    <span class="i">pipe_through</span> <span class="i">endpointPipe</span>
+
+    <span class="i">router</span> <span class="i">topRouter</span>
+    <span class="i">url</span> <span class="s">&quot;http://0.0.0.0:8085/&quot;</span>
+    <span class="i">memory_cache</span>
+    <span class="i">use_static</span> <span class="s">&quot;static&quot;</span>
+    <span class="i">use_gzip</span>
+}
+</code></pre></td>
+</tr>
+</table>
 </section>
 <section >
 <h3>How?</h3>
