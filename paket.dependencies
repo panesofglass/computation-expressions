@@ -1,11 +1,13 @@
 generate_load_scripts: true
 
 source https://nuget.org/api/v2
-framework: net462
+framework: net461
 
+nuget Expecto
 nuget Freya.Hopac prerelease
 nuget FSharp.Control.Reactive
 nuget LicenseToCIL
+nuget Saturn
 
 group Build
     generate_load_scripts: false

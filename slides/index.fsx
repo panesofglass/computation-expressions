@@ -10,7 +10,9 @@
 
 (*** hide ***)
 System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
-#load "../.paket/load/net462/main.group.fsx"
+#load "../.paket/load/net461/Hopac.fsx"
+#load "../.paket/load/net461/LicenseToCIL.fsx"
+#load "../.paket/load/net461/main.group.fsx"
 open System
 open System.Net
 open System.Reactive
@@ -234,18 +236,56 @@ async {
 
 ---
 
+## [Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
+
+---
+
+### Why should we care?
+
+*)
+
+let one = Some 1
+
+let tryDivide num den =
+    match den with
+    | 0 -> None
+    | n -> Some(num / n)
+
+match one with
+| Some x ->
+    match tryDivide x 0 with
+    | Some y -> Some(x + y)
+    | None -> None
+| None -> None
+
+(**
+
+' The above could be written like this, with nested match expressions.
+' The computation expression clearly wins out in terms of succinctness.
+' We also don't have to thread all the `None -> None` cases. This may
+' not seems like such a big deal until you get into a situation where
+' you have to cascade many option values in a long arrowhead pattern,
+' e.g. if you are doing some parsing.
+' In other words, computation expressions allow us to streamline our
+' code such that it looks mostly like normal F# code while making side-
+' effects explicit.
+
+---
+
 ### OptionBuilder
 *)
 
 type OptionMonad() =
     member __.Bind(m, f) = Option.bind f m
     member __.Return(x) = Some x
+(*** hide ***)
+    member __.Combine(m1, m2) =
+        match m1 with Some _ -> m1 | None -> m2
+    member __.Delay(f) = f()
 
 let opt = OptionMonad()
 
 (**
-
-[Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
 
 ' This is the basic definition of a monad written as a
 ' computation expression. The computation expression is
@@ -265,8 +305,9 @@ type OptionBuilder() =
     member __.Bind(m, f) = Option.bind f m
     member __.Return(x) = Some x
     member __.ReturnFrom(m: 'T option) = m
-    member __.Zero() = Some ()
-    member __.Combine(m, f: unit -> _) = Option.bind f m
+    member __.Zero() = None
+    member __.Combine(m, f: unit -> _) =
+        match m with Some _ -> m | None -> f()
     member __.Delay(f: unit -> 'T) = f
     member __.Run(f) = f()
 
@@ -328,21 +369,16 @@ maybe.Run(
 ### Delayed Computations
 *)
 
-(*** define-output:option-builder ***)
-let one = maybe { return 1 }
-let double x = maybe { return x * 2 }
-maybe {
-    if false then
-        printfn "proceeding"
-        let! x = one
-        let! y = double x
-        return x + y
-    else return! None
+opt {
+    return 1
+    printfn "delayed should not print"
+    return 2
 }
 
-(*** include-it:option-builder ***)
-
 (**
+
+    delayed should not print
+    val it : int option = Some 1
 
 ' Here we see that we can retrieve the values of one and two
 ' and add them together if carryOn is true. Otherwise, we
@@ -359,17 +395,14 @@ maybe {
 
 *)
 
-(*** define-output:option-builder-2 ***)
+(*** define-output:option-builder ***)
 maybe {
-    if false then
-        printfn "proceeding"
-        let! x = maybe { return 1 }
-        let! y = maybe { return x * 2 }
-        return x + y
-    else return! None
+    return 1
+    printfn "delayed should not print"
+    return 2
 }
 
-(*** include-it:option-builder-2 ***)
+(*** include-it:option-builder ***)
 
 (**
 
@@ -392,34 +425,6 @@ type Maybe<'T> = Maybe of (unit -> 'T option)
 ' execution of the computation by wrapping a function. The result
 ' then must be unwrapped and called, or the Run member could do
 ' the work as above.
-
----
-
-### Why should we care?
-
-*)
-
-if false then
-    printfn "proceeding"
-    match one with
-    | Some x ->
-        match double x with
-        | Some y -> Some(x + y)
-        | None -> None
-    | None -> None
-else None
-
-(**
-
-' The above could be written like this, with nested match expressions.
-' The computation expression clearly wins out in terms of succinctness.
-' We also don't have to thread all the `None -> None` cases. This may
-' not seems like such a big deal until you get into a situation where
-' you have to cascade many option values in a long arrowhead pattern,
-' e.g. if you are doing some parsing.
-' In other words, computation expressions allow us to streamline our
-' code such that it looks mostly like normal F# code while making side-
-' effects explicit.
 
 ---
 
@@ -463,6 +468,10 @@ else None
 ' much, so I can't make a great analogy, but let's assume they were more
 ' powerful than the rings for men. In that case, I would relate them to
 ' the query expressions introduced in F# 3.0.
+
+---
+
+## [Query Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions)
 
 ---
 
@@ -564,12 +573,10 @@ type FSharp.Control.AsyncBuilder with
     member __.Merge(x, y,
                     [<ProjectionParameter>] resultSelector : _ -> _) =
         async {
-            let! x' = Async.StartChildAsTask x
-            let! y' = Async.StartChildAsTask y
+            let x' = Async.StartAsTask x
+            let y' = Async.StartAsTask y
             do Task.WaitAll(x',y')
-            let! x'' = Async.AwaitTask x'
-            let! y'' = Async.AwaitTask y'
-            return resultSelector x'' y''
+            return resultSelector x'.Result y'.Result
         }
 
     member __.For(m, f) = __.Bind(m, f)
@@ -582,7 +589,7 @@ type FSharp.Control.AsyncBuilder with
 
 ---
 
-### Async Applicative Example
+### Parallel Async Example
 
 ' Jump to VSCode to run this in FSI, as the code snippet is too long.
 ' The code compares awaiting two sleeps and shows that the applicative,
@@ -592,15 +599,26 @@ type FSharp.Control.AsyncBuilder with
 ' We could argue about the best syntax, but this version uses that proposed
 ' in the VisualFSharp issues: https://github.com/fsharp/fslang-suggestions/issues/579
 
+---
+
+### Async with 1000ms Sleep
+
 *)
 
-(*** hide ***)
 let a (sw:Diagnostics.Stopwatch) = async {
     printfn "starting a %O" sw.ElapsedMilliseconds
     do! Async.Sleep 1000
     printfn "returning a %O" sw.ElapsedMilliseconds
     return 1
 }
+
+(**
+
+---
+
+### Async with 500ms Sleep
+
+*)
 
 let b (sw:Diagnostics.Stopwatch) = async {
     printfn "starting b %O" sw.ElapsedMilliseconds
@@ -609,29 +627,62 @@ let b (sw:Diagnostics.Stopwatch) = async {
     return 2
 }
 
-let comp sw = async {
-    for x in a sw do
-    ``and!`` y in b sw
-    return x + y
-}
+(**
+
+---
+
+### Sequential
+
+*)
 
 let compBind sw = async {
     let! x = a sw
     let! y = b sw
     return x + y
 }
-
 let sw = Diagnostics.Stopwatch.StartNew()
+let resultBind = compBind sw |> Async.RunSynchronously
+sw.Stop()
+printfn "compBind ran in %Oms with result %i" sw.ElapsedMilliseconds resultBind
+
+(**
+
+    starting a 7
+    returning a 1010
+    starting b 1016
+    returning b 1518
+    compBind ran in 1521ms with result 3
+
+---
+
+### Parallel
+
+*)
+
+let comp sw = async {
+    for x in a sw do
+    ``and!`` y in b sw
+    return x + y
+}
+sw.Reset()
+sw.Start()
 let result = comp sw |> Async.RunSynchronously
 sw.Stop()
 printfn "comp ran in %Oms with result %i" sw.ElapsedMilliseconds result
 
-// Compare with
-sw.Reset()
-sw.Start()
-let resultBind = compBind sw |> Async.RunSynchronously
-sw.Stop()
-printfn "compBind ran in %Oms with result %i" sw.ElapsedMilliseconds resultBind
+(**
+
+    starting a 4
+    starting b 4
+    returning b 505
+    returning a 1004
+    comp ran in 1005ms with result 3
+
+---
+
+### Another Async with 1500ms Sleep
+
+*)
 
 let c (sw:Diagnostics.Stopwatch) = async {
     printfn "starting c %O" sw.ElapsedMilliseconds
@@ -640,13 +691,19 @@ let c (sw:Diagnostics.Stopwatch) = async {
     return 3
 }
 
+(**
+---
+
+### 2+ Asyncs
+
+*)
+
 let comp3 sw = async {
     for x in a sw do
     ``and!`` y in b sw
     ``and!`` z in c sw
     return x + y + z
 }
-
 sw.Reset()
 sw.Start()
 let result3 = comp3 sw |> Async.RunSynchronously
@@ -655,14 +712,22 @@ printfn "comp3 ran in %Oms with result %i" sw.ElapsedMilliseconds result3
 
 (**
 
+    starting a starting b 3
+    3
+    starting c 4
+    returning b 504
+    returning a 1004
+    returning c 1506
+    comp3 ran in 1510ms with result 6
+
 ---
 
-### Caveat emptor
+### `CustomOperation` Overloading
 *)
 
 type FSharp.Control.AsyncBuilder with
 
-    [<CustomOperation("and!", IsLikeZip=true)>]
+    //[<CustomOperation("and!", IsLikeZip=true)>]
     member __.Merge(x: Task<'a>, y: Task<'b>,
                     [<ProjectionParameter>] resultSelector : _ -> _) =
         async {
@@ -678,8 +743,16 @@ type FSharp.Control.AsyncBuilder with
 ' similar named method. After all, many people extend `AsyncBuilder`
 ' with implementations of `Bind` that deal with `Task<'T>` and `Task`
 ' so that they don't have to deal with the `Async.AwaitTask`.
-' Unfortunately, that's not allowed with custom operations. That is
-' to say, you can define the overload ...
+' Interestingly, that's not allowed with custom operations if you:
+'   1) attempt to add it directly to the builder class and/or
+'   2) attempt to add the same attribute again with the same name.
+' If you add an extension member outside the type definition and assign
+' the name to a CustomOperation attribute on only one member, you _can_
+' add overloads. This appears to work through the class method dispatch
+' and is technically a bug, but it will allow you to overload custom
+' operations until official support is released, which is currently a
+' work in progress:
+' https://github.com/fsharp/fslang-design/blob/master/RFCs/FS-1056-allow-custom-operation-overloads.md
 
 ---
 
@@ -702,69 +775,7 @@ async {
 
 ---
 
-### Overloading workaround
-
-*)
-
-module Inference =
-    type Defaults =
-        | Defaults
-        static member Value (x: Async<int>) =
-            x
-        static member inline Value (x: int) =
-            async.Return x
-        static member inline Value (x: string) =
-            int x |> async.Return
-
-    let inline defaults (a: ^a, _: ^b) =
-        ((^a or ^b) : (static member Value : ^a -> Async<_>) a)
-    
-    let inline infer (a: 'a) =
-        defaults(a, Defaults)
-
-(*** hide ***)
-Inference.infer (async { return 1 })
-Inference.infer 1
-Inference.infer "1"
-
-(**
-
-' The Async Zip example is not really a good one. If you want to
-' allow both Async and Task<'T> in the same workflow, you're going to
-' have to ultimately pick one, and that usually means Task<'T>, which
-' changes the semantics of F# Async computations considerably. The
-' workaround should let you specify one of several types, typically
-' including a wrapped value, in this case, an Async<int>.
-
----
-
-### Overloading workaround (cont)
-
-*)
-
-type FSharp.Control.AsyncBuilder with
-    [<CustomOperation("add", MaintainsVariableSpaceUsingBind=true)>]
-    member inline __.Add(m, x) =
-        async {
-            let! a = m
-            let! b = Inference.infer x
-            return a + b
-        }
-
-(*** define-output: async-add ***)
-async {
-    let! m = async.Return 0
-    add "1"
-    add "2"
-} |> Async.RunSynchronously
-
-(*** include-it: async-add ***)
-
-(**
-
----
-
-### Other Limitations
+### [Other Limitations](https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSComp.txt#L1206)
 
 ' You can find additional limitations, specifically with query builders
 ' in the error codes defined in FSharp.Core:
@@ -788,12 +799,40 @@ async {
 
 ---
 
-### Domain specific languages
+## Domain Specific Languages
 
-Implementations of Common Intermediate Language (CIL):
+---
 
-- [ILBuilder](https://github.com/kbattocchi/ILBuilder)
-- [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
+### Builds with [Xake](https://github.com/FakeBuild/Xake)
+
+    #r "paket:
+      nuget Xake ~> 1.1 prerelease
+      nuget Xake.Dotnet ~> 1.1 prerelease //"
+    
+    open Xake
+    open Xake.Dotnet
+    
+    do xakeScript {
+      rules [
+        "main" <== ["helloworld.exe"]
+
+        "helloworld.exe" ..> csc {src !!"helloworld.cs"}
+      ]
+    }
+
+---
+
+### Testing with [Expecto](https://github.com/haf/expecto)
+
+*)
+
+(*** include: expecto ***)
+
+(**
+
+---
+
+### Emitting CIL with [LicenseToCIL](https://github.com/rspeele/LicenseToCIL)
 
 *)
 
@@ -808,9 +847,7 @@ Implementations of Common Intermediate Language (CIL):
 
 ---
 
-### Protocols
-
-[Freya](https://freya.io/) implements the HTTP state machine
+### HTTP Protocol with [Freya](https://freya.io/)
 
 *)
 
@@ -830,85 +867,15 @@ Implementations of Common Intermediate Language (CIL):
 
 ---
 
-### HTTP Protocol
+### MVC with [Saturn](https://saturnframework.org/)
 
-    GET http://openfsharp.org/ HTTP/1.1
+*)
 
-' HTTP is a simple client/server, request response protocol
-' that really only defines the behavior of the server. The
-' client contract is pretty simple and very flexible, and most
-' servers do their best to accommodate even barely correct
-' requests. The above is the minimum a client needs to send to
-' receive a response, and many servers will respond even without
-' the HTTP version.
+(*** include: saturn-controller ***)
 
----
+(*** include: saturn-app ***)
 
-### Hypermedia
-
-    "actions": [
-      {
-        "name":"update-customer",
-        "title":"Update Customer",
-        "method":"POST",
-        "href":"http://example.org/customers/123",
-        "type":"application/x-www-form-urlencoded",
-        "fields": [
-          {"name":"status","type":"hidden","value":"partial"},
-          {"name":"return","type":"hidden","value":"full"},
-          {"name":"email","type":"text" },
-          {"name":"sms","type":"number" }
-        ]
-      }
-    ]
-
-' The "hypertext" of HTTP implies that more can happen within
-' a series of HTTP requests, and the "more" is defined by the
-' media types transmitted between client and server. These can
-' relate application state in the form of hypermedia controls.
-' The above example is a [Siren](https://github.com/kevinswiber/siren)
-' media type relaying the next actions the client may take in
-' the current hypermedia session. (Taken from
-' [Mike Amundsen's blog](http://amundsen.com/blog/archives/1149)).
-' Hypermedia has been much more difficult to encode, and though
-' many have tried, Freya still doesn't have any hypermedia plugins
-' available.
-
----
-
-### Session Types
-
-    module example;
-
-    type <xsd> "{http://www.acme.com/types}Greetings" from "http://www.acme.com/types/Greetings.xsd" as Greetings;
-    type <xsd> "{http://www.acme.com/types}Compliments" from "http://www.acme.com/types/Compliments.xsd" as Compliments;
-    type <xsd> "{http://www.acme.com/types}Salutations" from "http://www.acme.com/types/Salutations.xsd" as Salutations;
-
-    global protocol HelloWorld(role Me, role World) {
-        hello(Greetings) from Me to World;
-        choice at World {
-            goodMorning(Compliments) from World to Me;
-        } or {
-            goodAfternoon(Salutations) from World to Me;
-        }
-    }
-
-' This leads us to Session Types.
-' Who has heard of session types?
-' Session types are under active research and aim to provide a
-' flexible type checking mechanism around protocols.
-' The target protocols cover single and multiple parties.
-' Hypermedia is one example of a protocol that could be encoded with
-' session types. Bank transactions, coffee orders, etc. could, as well.
-' Session types are even being used to define actor protocols in Erlang.
-' Consider how Type Providers made accessing data sources almost trivial
-' (at least once you had the type provider). Session types could
-' provide type safety on various types of workflows across multiple
-' agents.
-' This is an example of Scribble, a language for defining protocols
-' for use with session types. Based on Scribble, I think we could encode
-' something within computation expressions and provide session types
-' within F#. However, that work has only barely begun.
+(**
 
 ---
 
@@ -1069,6 +1036,7 @@ query {
 *)
 
 (*** hide ***)
+open Expecto
 open Freya.Core
 open Freya.Machines.Http
 open Freya.Types.Http
@@ -1076,6 +1044,18 @@ open Freya.Routers.Uri.Template
 open LicenseToCIL
 open LicenseToCIL.Builder
 open LicenseToCIL.Ops
+open Giraffe
+open Giraffe.Core
+open Saturn
+open Saturn.Pipeline
+open Saturn.Router
+
+(*** define: expecto ***)
+let tests =
+  test "A simple test" {
+    let subject = "Hello World"
+    Expect.equal subject "Hello World" "The strings should equal"
+  }
 
 (*** define: licensetocil ***)
 cil {
@@ -1113,3 +1093,23 @@ let machine =
 let router =
     freyaRouter {
         resource "/hello{/name}" machine }
+
+
+(*** define: saturn-controller ***)
+let commentController userId = controller {
+    index (fun ctx -> (sprintf "Comment Index handler for user %i" userId ) |> Controller.text ctx)
+    add (fun ctx -> (sprintf "Comment Add handler for user %i" userId ) |> Controller.text ctx)
+    show (fun (ctx, id) -> (sprintf "Show comment %s handler for user %i" id userId ) |> Controller.text ctx)
+    edit (fun (ctx, id) -> (sprintf "Edit comment %s handler for user %i" id userId )  |> Controller.text ctx)
+}
+
+(*** define: saturn-app ***)
+let app = application {
+    pipe_through endpointPipe
+
+    router topRouter
+    url "http://0.0.0.0:8085/"
+    memory_cache
+    use_static "static"
+    use_gzip
+}
