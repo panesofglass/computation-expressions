@@ -62,6 +62,26 @@ open FSharp.Control.Reactive.Builders
 
 ***
 
+## Topics
+
+---
+
+## [Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
+
+---
+
+## [Query Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions)
+
+---
+
+## Type Extensions
+
+---
+
+## Domain Specific Languages
+
+***
+
 ## Examples
 
 ' Let's begin with a few examples built into the language.
@@ -125,7 +145,7 @@ seq {
 (*** define-output: seq-append ***)
 Seq.append xs ys
 
-(*** include-it: seq-concat ***)
+(*** include-it: seq-append ***)
 
 (**
 
@@ -143,21 +163,30 @@ Seq.append xs ys
 
 (*** define-output: async-example ***)
 async {
-    let req = WebRequest.Create("http://openfsharp.org/")
+    let req = WebRequest.Create("https://www.openfsharp.org/")
     let! resp = req.AsyncGetResponse()
     use stream = resp.GetResponseStream()
-    let! bytes = stream.AsyncRead(91)
+    let! bytes = stream.AsyncRead(95)
     let text = Text.Encoding.UTF8.GetString(bytes)
     return (resp :?> HttpWebResponse).StatusCode, text
 }
 |> Async.RunSynchronously
-(*** include-it: async-example ***)
 
 (**
 
+    val it : HttpStatusCode * string =
+      (OK {value__ = 200;},
+       "<!DOCTYPE html>
+    <html lang="en-us">
+        <head>
+            <meta charset="UTF-8">
+            <title>Open F#</title>
+    ")
+
 ' Now let's look at an example using Async Workflows.
-' It's almost 10 years ago today that [Don Syme](https://twitter.com/dsyme) posted
-' [Introducing F# Asynchronous Workflows](https://blogs.msdn.microsoft.com/dsyme/2007/10/10/introducing-f-asynchronous-workflows/).
+' [Don Syme](https://twitter.com/dsyme) posted
+' [Introducing F# Asynchronous Workflows](https://blogs.msdn.microsoft.com/dsyme/2007/10/10/introducing-f-asynchronous-workflows/)
+' ten years ago.
 ' When we think of asynchronous and concurrent programming these days, we think of an `async`/`await` pair.
 ' To the best of my knowledge, this pattern started with F# in 2007.
 ' Here, we are requesting the Open F# web site, then reading the
@@ -558,7 +587,7 @@ type RxQueryBuilder with
 
 ---
 
-### Extending Existing Builders
+## Extending Existing Builders
 
 *)
 
