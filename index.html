@@ -88,6 +88,23 @@ for writing correct programs for a given domain.<br/>
 </section>
 <section >
 <section >
+<h2>Topics</h2>
+</section>
+<section >
+<h2><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">Computation Expressions</a></h2>
+</section>
+<section >
+<h2><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions">Query Expressions</a></h2>
+</section>
+<section >
+<h2>Type Extensions</h2>
+</section>
+<section >
+<h2>Domain Specific Languages</h2>
+</section>
+</section>
+<section >
+<section >
 <h2>Examples</h2>
 <aside class="notes">
 Let's begin with a few examples built into the language.<br/>
@@ -160,7 +177,7 @@ be done.<br/>
 </code></pre></td>
 </tr>
 </table>
-<table class="pre"><tr><td><pre><code>Could not find reference 'seq-concat'</code></pre></td></tr></table>
+<table class="pre"><tr><td><pre><code>seq [1; 2; 3; 4; ...]</code></pre></td></tr></table>
 <aside class="notes">
 Now, I know what you are thinking. Why all the fuss? I can do that<br/>
 with Seq.append, too. It turns out that everything we see in this<br/>
@@ -183,10 +200,10 @@ computations that modules of functions cannot.<br/>
 <span class="l">9: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">async</span> {
-    <span class="k">let</span> <span class="i">req</span> <span class="o">=</span> <span class="i">WebRequest</span><span class="o">.</span><span class="i">Create</span>(<span class="s">&quot;http://openfsharp.org/&quot;</span>)
+    <span class="k">let</span> <span class="i">req</span> <span class="o">=</span> <span class="i">WebRequest</span><span class="o">.</span><span class="i">Create</span>(<span class="s">&quot;https://www.openfsharp.org/&quot;</span>)
     <span class="k">let!</span> <span class="i">resp</span> <span class="o">=</span> <span class="i">req</span><span class="o">.</span><span class="i">AsyncGetResponse</span>()
     <span class="k">use</span> <span class="i">stream</span> <span class="o">=</span> <span class="i">resp</span><span class="o">.</span><span class="i">GetResponseStream</span>()
-    <span class="k">let!</span> <span class="i">bytes</span> <span class="o">=</span> <span class="i">stream</span><span class="o">.</span><span class="i">AsyncRead</span>(<span class="n">91</span>)
+    <span class="k">let!</span> <span class="i">bytes</span> <span class="o">=</span> <span class="i">stream</span><span class="o">.</span><span class="i">AsyncRead</span>(<span class="n">95</span>)
     <span class="k">let</span> <span class="i">text</span> <span class="o">=</span> <span class="i">Text</span><span class="o">.</span><span class="i">Encoding</span><span class="o">.</span><span class="i">UTF8</span><span class="o">.</span><span class="i">GetString</span>(<span class="i">bytes</span>)
     <span class="k">return</span> (<span class="i">resp</span> <span class="o">:?&gt;</span> <span class="i">HttpWebResponse</span>)<span class="o">.</span><span class="i">StatusCode</span>, <span class="i">text</span>
 }
@@ -194,11 +211,31 @@ computations that modules of functions cannot.<br/>
 </code></pre></td>
 </tr>
 </table>
-<table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">val</span> <span class="i">it</span> <span class="o">:</span> <span class="i">HttpStatusCode</span> <span class="o">*</span> <span class="i">string</span> <span class="o">=</span>
+  (<span class="i">OK</span> {<span class="i">value__</span> <span class="o">=</span> <span class="n">200</span>;},
+   <span class="s">&quot;&lt;!DOCTYPE html&gt;</span>
+<span class="s">&lt;html lang=&quot;</span><span class="i">en</span><span class="o">-</span><span class="i">us</span><span class="s">&quot;&gt;</span>
+<span class="s">    &lt;head&gt;</span>
+<span class="s">        &lt;meta charset=&quot;</span><span class="i">UTF</span><span class="o">-</span><span class="n">8</span><span class="s">&quot;&gt;</span>
+<span class="s">        &lt;title&gt;Open F#&lt;/title&gt;</span>
+<span class="s">&quot;</span>)
+</code></pre></td>
+</tr>
+</table>
 <aside class="notes">
 Now let's look at an example using Async Workflows.<br/>
-It's almost 10 years ago today that [Don Syme](https://twitter.com/dsyme) posted<br/>
-[Introducing F# Asynchronous Workflows](https://blogs.msdn.microsoft.com/dsyme/2007/10/10/introducing-f-asynchronous-workflows/).<br/>
+[Don Syme](https://twitter.com/dsyme) posted<br/>
+[Introducing F# Asynchronous Workflows](https://blogs.msdn.microsoft.com/dsyme/2007/10/10/introducing-f-asynchronous-workflows/)<br/>
+ten years ago.<br/>
 When we think of asynchronous and concurrent programming these days, we think of an `async`/`await` pair.<br/>
 To the best of my knowledge, this pattern started with F# in 2007.<br/>
 Here, we are requesting the Open F# web site, then reading the<br/>
@@ -659,7 +696,7 @@ with new custom operations.<br/>
 </aside>
 </section>
 <section >
-<h3>Extending Existing Builders</h3>
+<h2>Extending Existing Builders</h2>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
 <span class="l"> 2: </span>
 <span class="l"> 3: </span>
