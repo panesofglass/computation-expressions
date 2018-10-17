@@ -68,6 +68,7 @@ aspects of F# or similar languages, including:<br/>
 <section >
 <h2>Motivation</h2>
 <aside class="notes">
+This talk was prepared for Open FSharp 2017.<br/>
 One of the goals of this conference was to not dive into<br/>
 language features for their own sake. I don't intend to<br/>
 just tell you about computation expressions, nor do I intend<br/>
@@ -89,6 +90,10 @@ for writing correct programs for a given domain.<br/>
 <section >
 <section >
 <h2>Topics</h2>
+<aside class="notes">
+Computation Expressions is both a language feature and a general<br/>
+label for several, related features and capabilities.<br/>
+</aside>
 </section>
 <section >
 <h2><a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">Computation Expressions</a></h2>
@@ -107,20 +112,21 @@ for writing correct programs for a given domain.<br/>
 <section >
 <h2>Examples</h2>
 <aside class="notes">
-Let's begin with a few examples built into the language.<br/>
+Let's begin with a few examples built into FSharp.Core.<br/>
 </aside>
 </section>
 <section >
 <h3>Seq<'T></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">seq</span> {
-    <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">do</span>
-    <span class="k">yield</span> <span class="i">i</span>
-}
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">-&gt;</span> <span class="i">i</span> }
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>seq [1; 2; 3; 4; ...]</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">do</span> <span class="k">yield</span> <span class="i">i</span> }
 </code></pre></td>
 </tr>
 </table>
@@ -139,14 +145,34 @@ syntax.<br/>
 <section >
 <h3>Concatenating Seq<'T></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Seq</span><span class="o">.</span><span class="i">append</span> <span class="i">xs</span> <span class="i">ys</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
+<aside class="notes">
+Now, I know what you are thinking. Why all the fuss? I can do that<br/>
+with Seq.append, too. It turns out that everything we see in this<br/>
+talk could be written with modules of functions. Some people prefer<br/>
+that style, and that's fine. However, as we move further along,<br/>
+I think you'll see that CEs are a very good option for expressing<br/>
+computations that modules of functions cannot.<br/>
+</aside>
+</section>
+<section >
+<h3>Concatenating Seq<'T></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
 <span class="l">6: </span>
+<span class="l">7: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">xs</span> <span class="o">=</span> <span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">-&gt;</span> <span class="i">i</span> }
-<span class="k">let</span> <span class="i">ys</span> <span class="o">=</span> <span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">11..</span><span class="n">20</span> <span class="k">-&gt;</span> <span class="i">i</span> }
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">xs</span> <span class="o">=</span> <span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">do</span> <span class="k">yield</span> <span class="i">i</span> }
+<span class="k">let</span> <span class="i">ys</span> <span class="o">=</span> <span class="i">seq</span> { <span class="k">for</span> <span class="i">i</span> <span class="k">in</span> <span class="n">11..</span><span class="n">20</span> <span class="k">do</span> <span class="k">yield</span> <span class="i">i</span> }
+
 <span class="i">seq</span> {
     <span class="k">yield!</span> <span class="i">xs</span>
     <span class="k">yield!</span> <span class="i">ys</span>
@@ -167,24 +193,6 @@ we used `for` and `yield`. In this example, we used<br/>
 two `yield!`. Each binding has a translation rule<br/>
 used to compose the program which restrict what can<br/>
 be done.<br/>
-</aside>
-</section>
-<section >
-<h3>Concatenating Seq<'T></h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Seq</span><span class="o">.</span><span class="i">append</span> <span class="i">xs</span> <span class="i">ys</span>
-</code></pre></td>
-</tr>
-</table>
-<table class="pre"><tr><td><pre><code>seq [1; 2; 3; 4; ...]</code></pre></td></tr></table>
-<aside class="notes">
-Now, I know what you are thinking. Why all the fuss? I can do that<br/>
-with Seq.append, too. It turns out that everything we see in this<br/>
-talk could be written with modules of functions. Some people prefer<br/>
-that style, and that's fine. However, as we move further along,<br/>
-I think you'll see that CEs are a very good option for expressing<br/>
-computations that modules of functions cannot.<br/>
 </aside>
 </section>
 <section >
@@ -239,8 +247,8 @@ ten years ago.<br/>
 When we think of asynchronous and concurrent programming these days, we think of an `async`/`await` pair.<br/>
 To the best of my knowledge, this pattern started with F# in 2007.<br/>
 Here, we are requesting the Open F# web site, then reading the<br/>
-first 91 bytes (through the title) and returning the status code<br/>
-and first 91 bytes as text.<br/>
+first 95 bytes (through the title) and returning the status code<br/>
+and first 95 bytes as text.<br/>
 Async computations are delayed and require a call to start them.<br/>
 Not all computation expressions have to provide this delay.<br/>
 </aside>
@@ -362,14 +370,16 @@ effects explicit.<br/>
 </aside>
 </section>
 <section >
-<h3>OptionBuilder</h3>
+<h3>Option Monad</h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
+<span class="l">4: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">OptionMonad</span>() <span class="o">=</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Bind</span>(<span class="i">m</span>, <span class="i">f</span>) <span class="o">=</span> <span class="i">Option</span><span class="o">.</span><span class="i">bind</span> <span class="i">f</span> <span class="i">m</span>
     <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Return</span>(<span class="i">x</span>) <span class="o">=</span> <span class="i">Some</span> <span class="i">x</span>
+<span class="k">let</span> <span class="i">opt</span> <span class="o">=</span> <span class="i">OptionMonad</span>()
 </code></pre></td>
 </tr>
 </table>
@@ -477,16 +487,36 @@ For example, you may want to write `maybe.Return 1` rather than<br/>
 </section>
 <section >
 <h3>Delayed Computations</h3>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">opt</span> {
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">OptionMonad2</span>() <span class="o">=</span>
+    <span class="k">inherit</span> <span class="i">OptionMonad</span>()
+
+    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">ReturnFrom</span>(<span class="i">m</span>) <span class="o">=</span> <span class="i">m</span>
+    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Combine</span>(<span class="i">m1</span>, <span class="i">m2</span>) <span class="o">=</span>
+        <span class="k">match</span> <span class="i">m1</span> <span class="k">with</span> <span class="i">Some</span> _ <span class="k">-&gt;</span> <span class="i">m1</span> | <span class="i">None</span> <span class="k">-&gt;</span> <span class="i">m2</span>
+    <span class="k">member</span> <span class="i">__</span><span class="o">.</span><span class="i">Delay</span>(<span class="i">f</span>) <span class="o">=</span> <span class="i">f</span>()
+
+<span class="k">let</span> <span class="i">optMany</span> <span class="o">=</span> <span class="i">OptionMonad2</span>()
+
+<span class="i">optMany</span> {
     <span class="k">return</span> <span class="n">1</span>
     <span class="i">printfn</span> <span class="s">&quot;delayed should not print&quot;</span>
-    <span class="k">return</span> <span class="n">2</span>
+    <span class="k">return!</span> <span class="i">None</span>
 }
 </code></pre></td>
 </tr>
@@ -508,6 +538,11 @@ did not execute. The computation is only following the path<br/>
 selected in the if branch. The Delay is wrapped around the<br/>
 computation and keeps that branch of the computation from<br/>
 being evaluated.<br/>
+This example also highlights the fact that we are using<br/>
+F#'s support for object programming by means of `inherit`.<br/>
+We could also have `OptionMonad2` create its own instance<br/>
+of `OptionMonad` and use its members in its own, which is<br/>
+the preferred approach in F#.<br/>
 </aside>
 </section>
 <section >
@@ -521,7 +556,7 @@ being evaluated.<br/>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">maybe</span> {
     <span class="k">return</span> <span class="n">1</span>
     <span class="i">printfn</span> <span class="s">&quot;delayed should not print&quot;</span>
-    <span class="k">return</span> <span class="n">2</span>
+    <span class="k">return!</span> <span class="i">None</span>
 }
 </code></pre></td>
 </tr>
@@ -543,8 +578,8 @@ expensive.<br/>
 </tr>
 </table>
 <aside class="notes">
-Of course, you can also just create a wrapper type that delays<br/>
-execution of the computation by wrapping a function. The result<br/>
+Of course, you can create a wrapper type that delays<br/>
+execution of the computation by using a function. The result<br/>
 then must be unwrapped and called, or the Run member could do<br/>
 the work as above.<br/>
 </aside>
@@ -1287,15 +1322,15 @@ can achieve with computation expressions.<br/>
 <section >
 <h2>Why Not Macros?</h2>
 <aside class="notes">
-Since we are talking about language extensions, we must first<br/>
+Since we are talking about language extensions, we must<br/>
 talk about macros. After all, languages in the Lisp family<br/>
 support macros, to the extent that much of the language is built<br/>
 in macros. What could be more powerful? In short, nothing.<br/>
 However, F# does not provide a mechanism for writing macros,<br/>
 and it's a fair question to ask, "Why not?"<br/>
 Macros require a pre-compiler or a compiler plugin mechanism.<br/>
-When you introduce something like this, you are either on<br/>
-some other tool to handle some of the work of compiling a program.<br/>
+When you introduce something like this, you rely on another<br/>
+tool to handle some of the work of compiling a program.<br/>
 This can drastically increase and complicate compile times or even<br/>
 create very difficult-to-debug compiler crashes.<br/>
 In addition, macros don't play very well with typed languages<br/>
