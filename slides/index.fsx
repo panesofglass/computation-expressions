@@ -43,6 +43,7 @@ open FSharp.Control.Reactive.Builders
 
 ## Motivation
 
+' This talk was prepared for Open FSharp 2017.
 ' One of the goals of this conference was to not dive into
 ' language features for their own sake. I don't intend to
 ' just tell you about computation expressions, nor do I intend
@@ -64,6 +65,9 @@ open FSharp.Control.Reactive.Builders
 
 ## Topics
 
+' Computation Expressions is both a language feature and a general
+' label for several, related features and capabilities.
+
 ---
 
 ## [Computation Expressions](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions)
@@ -84,19 +88,20 @@ open FSharp.Control.Reactive.Builders
 
 ## Examples
 
-' Let's begin with a few examples built into the language.
+' Let's begin with a few examples built into FSharp.Core.
 
 ---
 
 ### Seq<'T>
 *)
 
-(*** define-output: seq-example ***)
-seq {
-    for i in 1..10 do
-    yield i
-}
-(*** include-it: seq-example ***)
+(*** define-output: seq-example-1 ***)
+seq { for i in 1..10 -> i }
+(*** include-it: seq-example-1 ***)
+
+(*** define-output: seq-example-2 ***)
+seq { for i in 1..10 do yield i }
+(*** include-it: seq-example-2 ***)
 
 (**
 
@@ -108,34 +113,6 @@ seq {
 ' that are not available to normal computation expressions,
 ' but this serves as a useful example for the list-like
 ' syntax.
-
----
-
-### Concatenating Seq<'T>
-*)
-
-(*** define-output: monoid-example ***)
-let xs = seq { for i in 1..10 -> i }
-let ys = seq { for i in 11..20 -> i }
-seq {
-    yield! xs
-    yield! ys
-}
-(*** include-it: monoid-example ***)
-
-(**
-
-' In addition to generating a sequence, we can also
-' compose multiple sequences into a single sequence
-' by concatenating them. This has the same effect as
-' calling `Seq.append` on the two sequences. However,
-' the computation expression provides a useful way
-' of defining the concatenation according to the rules
-' behind each of the bindings. In the former example,
-' we used `for` and `yield`. In this example, we used
-' two `yield!`. Each binding has a translation rule
-' used to compose the program which restrict what can
-' be done.
 
 ---
 
@@ -155,6 +132,35 @@ Seq.append xs ys
 ' that style, and that's fine. However, as we move further along,
 ' I think you'll see that CEs are a very good option for expressing
 ' computations that modules of functions cannot.
+
+---
+
+### Concatenating Seq<'T>
+*)
+
+(*** define-output: monoid-example ***)
+let xs = seq { for i in 1..10 do yield i }
+let ys = seq { for i in 11..20 do yield i }
+
+seq {
+    yield! xs
+    yield! ys
+}
+(*** include-it: monoid-example ***)
+
+(**
+
+' In addition to generating a sequence, we can also
+' compose multiple sequences into a single sequence
+' by concatenating them. This has the same effect as
+' calling `Seq.append` on the two sequences. However,
+' the computation expression provides a useful way
+' of defining the concatenation according to the rules
+' behind each of the bindings. In the former example,
+' we used `for` and `yield`. In this example, we used
+' two `yield!`. Each binding has a translation rule
+' used to compose the program which restrict what can
+' be done.
 
 ---
 
@@ -190,8 +196,8 @@ async {
 ' When we think of asynchronous and concurrent programming these days, we think of an `async`/`await` pair.
 ' To the best of my knowledge, this pattern started with F# in 2007.
 ' Here, we are requesting the Open F# web site, then reading the
-' first 91 bytes (through the title) and returning the status code
-' and first 91 bytes as text.
+' first 95 bytes (through the title) and returning the status code
+' and first 95 bytes as text.
 ' Async computations are delayed and require a call to start them.
 ' Not all computation expressions have to provide this delay.
 
@@ -301,17 +307,12 @@ match one with
 
 ---
 
-### OptionBuilder
+### Option Monad
 *)
 
 type OptionMonad() =
     member __.Bind(m, f) = Option.bind f m
     member __.Return(x) = Some x
-(*** hide ***)
-    member __.Combine(m1, m2) =
-        match m1 with Some _ -> m1 | None -> m2
-    member __.Delay(f) = f()
-
 let opt = OptionMonad()
 
 (**
@@ -398,10 +399,20 @@ maybe.Run(
 ### Delayed Computations
 *)
 
-opt {
+type OptionMonad2() =
+    inherit OptionMonad()
+
+    member __.ReturnFrom(m) = m
+    member __.Combine(m1, m2) =
+        match m1 with Some _ -> m1 | None -> m2
+    member __.Delay(f) = f()
+
+let optMany = OptionMonad2()
+
+optMany {
     return 1
     printfn "delayed should not print"
-    return 2
+    return! None
 }
 
 (**
@@ -417,6 +428,11 @@ opt {
 ' selected in the if branch. The Delay is wrapped around the
 ' computation and keeps that branch of the computation from
 ' being evaluated.
+' This example also highlights the fact that we are using
+' F#'s support for object programming by means of `inherit`.
+' We could also have `OptionMonad2` create its own instance
+' of `OptionMonad` and use its members in its own, which is
+' the preferred approach in F#.
 
 ---
 
@@ -428,7 +444,7 @@ opt {
 maybe {
     return 1
     printfn "delayed should not print"
-    return 2
+    return! None
 }
 
 (*** include-it:option-builder ***)
@@ -450,8 +466,8 @@ type Maybe<'T> = Maybe of (unit -> 'T option)
 
 (**
 
-' Of course, you can also just create a wrapper type that delays
-' execution of the computation by wrapping a function. The result
+' Of course, you can create a wrapper type that delays
+' execution of the computation by using a function. The result
 ' then must be unwrapped and called, or the Run member could do
 ' the work as above.
 
@@ -1007,15 +1023,15 @@ query {
 
 ## Why Not Macros?
 
-' Since we are talking about language extensions, we must first
+' Since we are talking about language extensions, we must
 ' talk about macros. After all, languages in the Lisp family
 ' support macros, to the extent that much of the language is built
 ' in macros. What could be more powerful? In short, nothing.
 ' However, F# does not provide a mechanism for writing macros,
 ' and it's a fair question to ask, "Why not?"
 ' Macros require a pre-compiler or a compiler plugin mechanism.
-' When you introduce something like this, you are either on
-' some other tool to handle some of the work of compiling a program.
+' When you introduce something like this, you rely on another
+' tool to handle some of the work of compiling a program.
 ' This can drastically increase and complicate compile times or even
 ' create very difficult-to-debug compiler crashes.
 ' In addition, macros don't play very well with typed languages
